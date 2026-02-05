@@ -1,4 +1,4 @@
-import { initDB } from './database';
+import initDB from './config/database';
 
 async function main() {
     const db = await initDB();
@@ -22,7 +22,6 @@ async function main() {
 
 main().catch(console.error);
 
-import { initDB } from './database';
 
 async function getUserById(id: number) {
     const db = await initDB();
