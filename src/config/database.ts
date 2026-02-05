@@ -6,7 +6,7 @@ export default async function initDB(): Promise<Database | null> {
 
     try {
         const db = await open({
-            filename: path.resolve('data/database.db'),
+            filename: path.resolve('database.db'),
             driver: sqlite3.Database,
             mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
         })
