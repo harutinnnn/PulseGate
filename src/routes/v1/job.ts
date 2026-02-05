@@ -7,13 +7,13 @@ import {validate} from "../../middleware/validate";
 const router = Router();
 
 
-// const createUserSchema = z.object({
-//     email: z.email(),
-//     password: z.string().min(8),
-// })
+const createUserSchema = z.object({
+    email: z.email(),
+    password: z.string().min(8),
+})
 
 router.get('/jobs',
-    // validate(createUserSchema),
+    validate(createUserSchema),
     JobController.jobs
 )
 

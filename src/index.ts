@@ -3,12 +3,38 @@ import https, {ServerOptions as HttpsServerOptions} from 'https'
 import http, {IncomingMessage, ServerResponse} from 'http'
 import fs from 'fs'
 import path from 'path'
+import 'dotenv/config';
+
+import logger from "./config/logger";
 
 import {Database} from "sqlite";
 
 import initDB from './config/database';
 
+import { register, httpRequestDuration, httpRequestTotal } from './config/metrics'
+
 const app = express();
+
+
+app.use((req, res, next) => {
+    const end = httpRequestDuration.startTimer({ method: req.method })
+
+    res.on('finish', () => {
+        end({
+            route: req.route?.path || req.path,
+            status: res.statusCode,
+        })
+
+        httpRequestTotal.inc({
+            method: req.method,
+            route: req.route?.path || req.path,
+            status: res.statusCode,
+        })
+    })
+
+    next()
+})
+
 
 
 let dbReady = false;
@@ -17,6 +43,7 @@ let db: Database | null;
 (async () => {
     db = await initDB();
     if (db) {
+        logger.info('Database connected');
         dbReady = true;
     }
 })()
@@ -40,6 +67,11 @@ app.use(express.urlencoded({extended: true}));
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
     next()
+})
+
+app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
 })
 
 
