@@ -21,5 +21,9 @@ router.get('/jobs/:id',
     JobController.job
 )
 
+router.put('/jobs/:id',
+    JobController.job
+)
+
 
 export default router;

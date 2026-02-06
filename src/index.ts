@@ -16,6 +16,7 @@ import { register, httpRequestDuration, httpRequestTotal } from './config/metric
 const app = express();
 
 
+//Prometheus metrics
 app.use((req, res, next) => {
     const end = httpRequestDuration.startTimer({ method: req.method })
 
@@ -35,6 +36,11 @@ app.use((req, res, next) => {
     next()
 })
 
+app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
+})
+//END Prometheus metrics
 
 
 let dbReady = false;
@@ -65,16 +71,20 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 
-app.get('/', async (req: Request, res: Response, next: NextFunction) => {
-    next()
-})
 
-app.get('/metrics', async (_req, res) => {
-    res.set('Content-Type', register.contentType)
-    res.end(await register.metrics())
-})
+//TODO disallow PUT and PATCH request types
+// const bannedMethods = ['PUT', 'PATCH'];
+//
+// app.use((req, res, next) => {
+//     if (bannedMethods.includes(req.method)) {
+//         res.setHeader('Allow', 'GET, POST, DELETE'); // Good practice to tell the client what IS allowed
+//         return res.status(405).end();
+//     }
+//     next();
+// });
 
 
+//Https redirection
 const httpServer = http.createServer(
     (req: IncomingMessage, res: ServerResponse) => {
         if (!req.headers.host || !req.url) {
