@@ -16,31 +16,6 @@ import { register, httpRequestDuration, httpRequestTotal } from './config/metric
 const app = express();
 
 
-//Prometheus metrics
-app.use((req, res, next) => {
-    const end = httpRequestDuration.startTimer({ method: req.method })
-
-    res.on('finish', () => {
-        end({
-            route: req.route?.path || req.path,
-            status: res.statusCode,
-        })
-
-        httpRequestTotal.inc({
-            method: req.method,
-            route: req.route?.path || req.path,
-            status: res.statusCode,
-        })
-    })
-
-    next()
-})
-
-app.get('/metrics', async (_req, res) => {
-    res.set('Content-Type', register.contentType)
-    res.end(await register.metrics())
-})
-//END Prometheus metrics
 
 
 let dbReady = false;
@@ -68,8 +43,35 @@ app.use(cors(corsOptions));
 
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: false}));
 
+
+
+//Prometheus metrics
+app.use((req, res, next) => {
+    const end = httpRequestDuration.startTimer({ method: req.method })
+
+    res.on('finish', () => {
+        end({
+            route: req.route?.path || req.path,
+            status: res.statusCode,
+        })
+
+        httpRequestTotal.inc({
+            method: req.method,
+            route: req.route?.path || req.path,
+            status: res.statusCode,
+        })
+    })
+
+    next()
+})
+
+app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
+})
+//END Prometheus metrics
 
 
 //TODO disallow PUT and PATCH request types

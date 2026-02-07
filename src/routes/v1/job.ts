@@ -1,16 +1,14 @@
-import {Router} from "express";
+import {NextFunction, Request, Response, Router} from "express";
 import JobController from "../../controllers/JobController";
 
 import {validate} from "../../middleware/validate";
-import createUserSchema from "../../schemas/createUserSchema";
-import createJobCalidationSchema from "../../schemas/createJobCalidationSchema";
+import { registerUserSchema, RegisterUserInput } from "../../schemas/createUser.schema";
+import { z } from 'zod'
+import {createJobSchema} from "../../schemas/createJob.schema";
 
 const router = Router();
 
-router.get('/jobs',
-    validate(createUserSchema),
-    JobController.jobs
-)
+
 
 router.get('/jobs/:id',
     JobController.job
@@ -19,9 +17,16 @@ router.get('/jobs/:id',
 router.put('/jobs/:id',
     JobController.job
 )
+
 router.post('/jobs',
-    validate(createJobCalidationSchema),
+    // validate(createJobSchema),
     JobController.addJob
+)
+
+
+router.get('/jobs',
+    validate(registerUserSchema),
+    JobController.jobs
 )
 
 
