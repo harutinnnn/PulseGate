@@ -1,38 +1,21 @@
-import { Request, Response, NextFunction } from "express";
-import { ZodError } from "zod/v4";
-import {AnyZodObject} from "zod/v4";
+import { Request, Response, NextFunction } from 'express';
+import { z, ZodError } from 'zod';
 
-export const validate =
-    (schema: AnyZodObject) =>
-        async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                await schema.parseAsync({
-                    body: req.body,
-                    query: req.query,
-                    params: req.params,
+export const validate = (schema: z.ZodObject<any>) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await schema.parseAsync(req.body);
+            next();
+        } catch (err) {
+            if (err instanceof ZodError) {
+                return res.status(400).json({
+                    status: 'fail',
+                    // v4.3.6 introduces z.formatError for direct field-to-message mapping
+                    errors: z.formatError(err),
+                    // Provides a single-string summary of all issues
+                    summary: z.prettifyError(err)
                 });
-
-                return next();
-            } catch (error) {
-                // 1. Check if it is a ZodError
-                if (error instanceof ZodError) {
-
-                    // 2. Map the errors
-                    // If you still get TS errors here, explicit casting (as ZodError) is a safe fallback
-                    const zodError = error as ZodError;
-
-                    const formattedErrors = zodError.errors.map((e) => ({
-                        path: e.path.join('.'),
-                        message: e.message
-                    }));
-
-                    return res.status(400).json({
-                        status: "fail",
-                        errors: formattedErrors
-                    });
-                }
-
-                // Handle other unexpected errors
-                return res.status(500).json({ status: "error", message: "Internal Error" });
             }
-        };
+            return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+        }
+    };
