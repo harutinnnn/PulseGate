@@ -1,10 +1,13 @@
-import {Router} from "express";
+import {NextFunction, Request, Response, Router} from "express";
 import JobController from "../../controllers/JobController";
 
 import {validate} from "../../middleware/validate";
+import {loginSchema} from "../../schemas/createUser.schema";
+import { z } from 'zod'
 import {createJobSchema} from "../../schemas/createJob.schema";
 
 const router = Router();
+
 
 
 router.get('/jobs/:id',
@@ -22,6 +25,7 @@ router.post('/jobs',
 
 
 router.get('/jobs',
+    validate(loginSchema),
     JobController.jobs
 )
 

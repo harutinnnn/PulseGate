@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {validationResult} from "express-validator";
-import JobInterface from "../interfaces/JobInterface";
+import {JobInterface} from "../interfaces/JobInterface";
 import ErrorResponseInterface from "../interfaces/ErrorResponseInterface";
 import logger from '../config/logger';
 

@@ -1,4 +1,4 @@
-export default interface JobInterface {
+export type JobInterface = {
     id: string,
     tenant_id: string,
     type: string

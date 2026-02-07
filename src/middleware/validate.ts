@@ -10,10 +10,8 @@ export const validate = (schema: z.ZodObject<any>) =>
             if (err instanceof ZodError) {
                 return res.status(400).json({
                     status: 'fail',
-                    // v4.3.6 introduces z.formatError for direct field-to-message mapping
                     errors: z.formatError(err),
-                    // Provides a single-string summary of all issues
-                    summary: z.prettifyError(err)
+                    // summary: z.prettifyError(err)
                 });
             }
             return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
