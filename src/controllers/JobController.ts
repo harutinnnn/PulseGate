@@ -97,10 +97,7 @@ class JobController {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-
-
                 return res.status(400).json({statusCode: 401, message: 'validation error'})
-
             }
 
             return res.status(200).json(job)
@@ -134,6 +131,9 @@ class JobController {
 
             jobService.create(req.body as JobCreateDataType).then(data => {
 
+
+                //TODO add in pool heap
+
                 return res.status(200).json({
                     id: data?.id,
                     status: data.status
@@ -156,8 +156,6 @@ class JobController {
             }
         }
     }
-
-
 }
 
 export default new JobController();
