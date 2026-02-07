@@ -2,9 +2,7 @@ import {NextFunction, Request, Response, Router} from "express";
 import JobController from "../../controllers/JobController";
 
 import {validate} from "../../middleware/validate";
-import {loginSchema} from "../../schemas/createUser.schema";
-import { z } from 'zod'
-import {createJobSchema} from "../../schemas/createJob.schema";
+import {createJobSchema} from "../../schemas/create.job.schema";
 
 const router = Router();
 
@@ -25,7 +23,6 @@ router.post('/jobs',
 
 
 router.get('/jobs',
-    validate(loginSchema),
     JobController.jobs
 )
 

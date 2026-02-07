@@ -1,5 +1,1 @@
-import JobApi from './job';
-
-export {
-    JobApi,
-}
+export { default as JobApi } from './job';
