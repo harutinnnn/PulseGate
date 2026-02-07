@@ -164,10 +164,16 @@ const httpsOptions: HttpsServerOptions = {
 
 const httpsServer = https.createServer(httpsOptions, app);
 
-httpServer.listen(80, '0.0.0.0', () => {
-    console.log('HTTP redirect server running on port 80')
-})
+//TODO temporary disabled 80,443 ports
+// httpServer.listen(80, '0.0.0.0', () => {
+//     console.log('HTTP redirect server running on port 80')
+// })
+//
+// httpsServer.listen(443, '0.0.0.0', () => {
+//     console.log('HTTPS server running on port 443')
+// })
 
-httpsServer.listen(443, '0.0.0.0', () => {
-    console.log('HTTPS server running on port 443')
-})
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Running on http://localhost:${PORT}`);
+});
