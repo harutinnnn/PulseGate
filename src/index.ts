@@ -11,11 +11,9 @@ import {Database} from "sqlite";
 
 import initDB from './config/database';
 
-import { register, httpRequestDuration, httpRequestTotal } from './config/metrics'
+import {register, httpRequestDuration, httpRequestTotal} from './config/metrics'
 
 const app = express();
-
-
 
 
 let dbReady = false;
@@ -46,10 +44,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 
-
 //Prometheus metrics
 app.use((req, res, next) => {
-    const end = httpRequestDuration.startTimer({ method: req.method })
+    const end = httpRequestDuration.startTimer({method: req.method})
 
     res.on('finish', () => {
         end({
@@ -164,7 +161,7 @@ const httpsOptions: HttpsServerOptions = {
 
 const httpsServer = https.createServer(httpsOptions, app);
 
-//TODO temporary disabled 80,443 ports
+//TODO temporary disabeled 80,443 ports
 // httpServer.listen(80, '0.0.0.0', () => {
 //     console.log('HTTP redirect server running on port 80')
 // })
@@ -174,6 +171,6 @@ const httpsServer = https.createServer(httpsOptions, app);
 // })
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(3000, '0.0.0.0', () => {
     console.log(`Running on http://localhost:${PORT}`);
 });
