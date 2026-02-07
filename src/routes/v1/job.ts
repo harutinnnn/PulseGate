@@ -1,16 +1,11 @@
 import {Router} from "express";
 import JobController from "../../controllers/JobController";
 
-import { z } from 'zod'
 import {validate} from "../../middleware/validate";
+import createUserSchema from "../../schemas/createUserSchema";
+import createJobCalidationSchema from "../../schemas/createJobCalidationSchema";
 
 const router = Router();
-
-
-const createUserSchema = z.object({
-    email: z.email(),
-    password: z.string().min(8),
-})
 
 router.get('/jobs',
     validate(createUserSchema),
@@ -23,6 +18,10 @@ router.get('/jobs/:id',
 
 router.put('/jobs/:id',
     JobController.job
+)
+router.post('/jobs',
+    validate(createJobCalidationSchema),
+    JobController.addJob
 )
 
 
