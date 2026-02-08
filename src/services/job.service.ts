@@ -17,6 +17,7 @@ export default class JobService {
 
                 const db = await initDB();
 
+                console.log('data.destination.headers', data.destination.headers);
                 const status = 'pending';
                 const insert = await db?.run(
                     'INSERT INTO ' +
@@ -50,7 +51,9 @@ export default class JobService {
                         data.payload.status,
                         data.destination.url,
                         data.destination.method,
-                        data.destination.headers,
+                        Object.entries(data.destination.headers)
+                            .map(([key, value]) => `${key}:${value}`)
+                            .join(';'),
                         data.destination.timeout_ms,
                         data.dedupe_key,
                         data.execute_at,
@@ -76,6 +79,4 @@ export default class JobService {
             return data;
         })
     }
-
-
 }

@@ -130,8 +130,6 @@ class JobController {
             const jobService = new JobService()
 
             jobService.create(req.body as JobCreateDataType).then(data => {
-
-
                 //TODO add in pool heap
 
                 return res.status(200).json({

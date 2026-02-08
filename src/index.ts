@@ -6,26 +6,11 @@ import path from 'path'
 import 'dotenv/config';
 
 import logger from "./config/logger";
-
-import {Database} from "sqlite";
-
-import initDB from './config/database';
+import './config/database';
 
 import {register, httpRequestDuration, httpRequestTotal} from './config/metrics'
 
 const app = express();
-
-
-let dbReady = false;
-
-let db: Database | null;
-(async () => {
-    db = await initDB();
-    if (db) {
-        logger.info('Database connected');
-        dbReady = true;
-    }
-})()
 
 
 import cors from 'cors';
@@ -64,6 +49,7 @@ app.use((req, res, next) => {
     next()
 })
 
+
 app.get('/metrics', async (_req, res) => {
     res.set('Content-Type', register.contentType)
     res.end(await register.metrics())
@@ -100,50 +86,26 @@ const httpServer = http.createServer(
 )
 
 
-app.get('/healthz', async (req: Request, res: Response) => {
+import {checkDbReady} from "./utils/health";
+
+app.get('/healthz', (_req, res) => {
     res.status(200).json({status: 'ok'})
 })
 
+app.get('/readyz', async (_req, res) => {
 
-const checkDb = (): Promise<boolean> =>
-    new Promise(async (resolve) => {
-        try {
-
-            if (db) {
-                await db.get('SELECT 1')
-                resolve(true)
-
-            } else {
-                resolve(false)
-            }
-        } catch (err) {
-            console.error('ERR', err)
-            resolve(false)
-        }
+    checkDbReady().then(ok => {
+        console.log('ok', ok)
+        res.status(200).json({
+            status: 'ready',
+            db: 'up',
+        })
+    }).catch((err) => {
+        return res.status(503).json({
+            status: 'not-ready',
+            db: 'down',
+        })
     })
-
-
-app.get('/readyz', async (req: Request, res: Response) => {
-
-    if (!dbReady) {
-        return res.status(503).json({
-            status: 'not ready',
-            reason: 'db not connected',
-        })
-    }
-
-    const dbOk = await checkDb();
-
-    console.log('dbOk', dbOk)
-
-    if (!dbOk) {
-        return res.status(503).json({
-            status: 'not ready',
-            reason: 'db query failed',
-        })
-    }
-
-    return res.status(200).json({status: 'ready'})
 })
 
 /**

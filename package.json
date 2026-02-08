@@ -12,10 +12,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.2.0",
     "@types/sqlite3": "^3.1.11",
+    "drizzle-kit": "^0.31.8",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "ts-jest": "^29.4.6",
@@ -25,8 +27,10 @@
   "dependencies": {
     "@types/cors": "^2.8.19",
     "audit": "^0.0.6",
+    "better-sqlite3": "^12.6.2",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
     "knex": "^3.1.0",

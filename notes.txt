@@ -7,3 +7,4 @@ npx knex migrate:down
 Create
 
 npx knex migrate:make create_users_table -x ts
+
