@@ -1,15 +1,12 @@
 import client from 'prom-client'
 
-// Create a Registry (recommended)
 export const register = new client.Registry()
 
-// Collect default Node.js metrics (CPU, memory, event loop, etc.)
 client.collectDefaultMetrics({
     register,
-    prefix: 'app_', // optional prefix
+    prefix: 'app_',
 })
 
-// Custom metrics examples
 export const httpRequestDuration = new client.Histogram({
     name: 'http_request_duration_seconds',
     help: 'HTTP request duration',

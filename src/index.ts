@@ -86,7 +86,7 @@ const httpServer = http.createServer(
 )
 
 
-import {checkDbReady} from "./utils/health";
+import {checkDbReady} from "./utils/health.utility";
 
 app.get('/healthz', (_req, res) => {
     res.status(200).json({status: 'ok'})

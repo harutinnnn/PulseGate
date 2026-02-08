@@ -2,6 +2,9 @@ import {JobCreateDataType} from "../types/job.create.data.type";
 import initDB from "../config/database";
 import logger from "../config/logger";
 import {JobCreateResponseType} from "../types/job.create.response.type";
+import {JobGetType} from "../types/job.get.type";
+import {Job, JobsResponseType} from "../types/jobs.respose.type";
+import {countRows} from "../utils/count.rows.utility";
 
 export default class JobService {
 
@@ -17,7 +20,6 @@ export default class JobService {
 
                 const db = await initDB();
 
-                console.log('data.destination.headers', data.destination.headers);
                 const status = 'pending';
                 const insert = await db?.run(
                     'INSERT INTO ' +
@@ -51,7 +53,7 @@ export default class JobService {
                         data.payload.status,
                         data.destination.url,
                         data.destination.method,
-                        Object.entries(data.destination.headers)
+                        Object.entries(data.destination.headers || {})
                             .map(([key, value]) => `${key}:${value}`)
                             .join(';'),
                         data.destination.timeout_ms,
@@ -78,5 +80,95 @@ export default class JobService {
 
             return data;
         })
+    }
+
+    /**
+     * @param id
+     */
+    async get(id: number): Promise<JobGetType> {
+
+
+        try {
+
+            const db = await initDB();
+
+            const select = "id,tenant_id,type,status,created_at,execute_at,current_attempts,max_attempts,last_error,destination_url,destination_method"
+            const job = await db?.get(`SELECT ${select}
+                                       FROM jobs
+                                       WHERE id = ?`, [id])
+
+
+            return job as JobGetType;
+
+        } catch (err) {
+
+            logger.error("Database error in JobService.get:", err);
+            throw err;
+
+        }
+    }
+
+
+    /**
+     * @param queryParams
+     * @return Promise<JobsResponseType>
+     */
+    async list(queryParams: Record<string, any>): Promise<JobsResponseType> {
+
+        const db = await initDB();
+
+        const {tenant_id, status, limit, cursor} = queryParams;
+
+        const conditions: string[] = []
+        const values: any[] = []
+
+
+        let isWhere = false;
+
+        if (tenant_id) {
+            conditions.push('tenant_id = ?')
+            values.push(tenant_id)
+
+            isWhere = true;
+        }
+
+        if (status) {
+            conditions.push('status = ?')
+            values.push(status)
+
+            isWhere = true;
+        }
+
+        let where: string = ""
+        if (isWhere) {
+            where = `WHERE ${conditions.join(' AND ')}`
+        }
+
+        let limitQuery: string = ""
+        if (limit && cursor) {
+            limitQuery = `LIMIT  ${limit} OFFSET ${cursor}`;
+
+        } else if (limit) {
+            limitQuery = `LIMIT  ${limit}`;
+        }
+
+        const sql = `
+            SELECT id, status, created_at
+            FROM jobs ${where}
+            ORDER BY id DESC
+                ${limitQuery}`;
+
+        const jobs: Job[] | undefined = await db?.all(sql, values);
+
+        let next_cursor: number | undefined = limit && !cursor ? limit : limit && cursor ? parseInt(limit) + parseInt(cursor) : 0;
+
+        if (jobs?.length && jobs?.length < parseInt(limit)) {
+            next_cursor = undefined;
+        }
+
+        return {
+            items: jobs,
+            next_cursor: next_cursor
+        }
     }
 }
