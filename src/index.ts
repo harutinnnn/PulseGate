@@ -4,6 +4,7 @@ import http, {IncomingMessage, ServerResponse} from 'http'
 import fs from 'fs'
 import path from 'path'
 import 'dotenv/config';
+import {checkDbReady} from "./db/index";
 
 import logger from "./config/logger";
 import './config/database';
@@ -86,26 +87,24 @@ const httpServer = http.createServer(
 )
 
 
-import {checkDbReady} from "./utils/health.utility";
+// import {checkDbReady} from "./utils/health.utility";
 
 app.get('/healthz', (_req, res) => {
     res.status(200).json({status: 'ok'})
 })
 
 app.get('/readyz', async (_req, res) => {
-
-    checkDbReady().then(ok => {
-        console.log('ok', ok)
+    if (checkDbReady()) {
         res.status(200).json({
             status: 'ready',
             db: 'up',
         })
-    }).catch((err) => {
+    } else {
         return res.status(503).json({
             status: 'not-ready',
             db: 'down',
         })
-    })
+    }
 })
 
 /**

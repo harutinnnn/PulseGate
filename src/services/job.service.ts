@@ -1,10 +1,12 @@
 import {JobCreateDataType} from "../types/job.create.data.type";
-import initDB from "../config/database";
 import logger from "../config/logger";
 import {JobCreateResponseType} from "../types/job.create.response.type";
 import {JobGetType} from "../types/job.get.type";
 import {Job, JobsResponseType} from "../types/jobs.respose.type";
-import {countRows} from "../utils/count.rows.utility";
+import {StatusesEnum} from "../enums/statuses.enum";
+import {JobRetryType} from "../types/job.retry.type";
+import JobModel from "../controllers/models/job.model";
+import {JobType} from "../types/job.type";
 
 export default class JobService {
 
@@ -18,96 +20,123 @@ export default class JobService {
 
             try {
 
-                const db = await initDB();
+                const jonData: Record<string, any> = {
+                    tenant_id: data.tenant_id,
+                    type: data.type,
+                    status: StatusesEnum.STATUS_PENDING,
+                    payload_order_id: data.payload.order_id,
+                    payload_status: data.payload.status,
+                    destination_url: data.destination.url,
+                    destination_method: data.destination.method,
+                    destination_headers: Object.entries(data.destination.headers || {})
+                        .map(([key, value]) => `${key}:${value}`)
+                        .join(';'),
+                    destination_timeout_ms: data.destination.timeout_ms,
+                    dedupe_key: data.dedupe_key,
+                    execute_at: data.execute_at,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    max_attempts: data.retry?.max_attempts,
+                    base_delay_ms: data.retry?.base_delay_ms,
+                    max_delay_ms: data.retry?.max_delay_ms,
+                    current_attempts: 0,
+                    rate_limit_rps: data.rate_limit?.rps,
+                    rate_limit_burst: data.rate_limit?.burst,
+                }
 
-                const status = 'pending';
-                const insert = await db?.run(
-                    'INSERT INTO ' +
-                    'jobs (' +
-                    '   tenant_id,' +
-                    '   type, ' +
-                    '   status,' +
-                    '   payload_order_id,' +
-                    '   payload_status,' +
-                    '   destination_url,' +
-                    '   destination_method,' +
-                    '   destination_headers,' +
-                    '   destination_timeout_ms,' +
-                    '   dedupe_key,' +
-                    '   execute_at,' +
-                    '   created_at,' +
-                    '   updated_at,' +
-                    '   max_attempts,' +
-                    '   base_delay_ms,' +
-                    '   max_delay_ms,' +
-                    '   current_attempts,' +
-                    '   rate_limit_rps,' +
-                    '   rate_limit_burst' +
-                    ') ' +
-                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [
-                        data.tenant_id,
-                        data.type,
-                        status,
-                        data.payload.order_id,
-                        data.payload.status,
-                        data.destination.url,
-                        data.destination.method,
-                        Object.entries(data.destination.headers || {})
-                            .map(([key, value]) => `${key}:${value}`)
-                            .join(';'),
-                        data.destination.timeout_ms,
-                        data.dedupe_key,
-                        data.execute_at,
-                        new Date(),
-                        new Date(),
-                        data.retry?.max_attempts,
-                        data.retry?.base_delay_ms,
-                        data.retry?.max_delay_ms,
-                        0,
-                        data.rate_limit?.rps,
-                        data.rate_limit?.burst,
-                    ],
-                );
+                const lid = JobModel.create(jonData)
 
-                logger.info('Inserted row with ID:' + insert?.lastID)
-                resolve({id: insert?.lastID || 0, status: status});
+                logger.info(`Job ${lid} added`)
+                resolve({id: lid, status: jonData.status});
 
             } catch (err) {
                 logger.error(err)
                 reject(err);
             }
-
-            return data;
         })
     }
 
     /**
      * @param id
      */
-    async get(id: number): Promise<JobGetType> {
+    async get(id: number): Promise<JobGetType | any> {
+        return JobModel.getJobById(id)
+    }
 
+    /**
+     * @param id
+     */
+    async retry(id: number): Promise<JobRetryType> {
 
         try {
 
-            const db = await initDB();
+            const job: JobType | undefined = await JobModel.getJobById(id, ['id', 'status'])
 
-            const select = "id,tenant_id,type,status,created_at,execute_at,current_attempts,max_attempts,last_error,destination_url,destination_method"
-            const job = await db?.get(`SELECT ${select}
-                                       FROM jobs
-                                       WHERE id = ?`, [id])
+            if (job) {
+
+                if (job.status !== StatusesEnum.STATUS_FAILED && job.status !== StatusesEnum.STATUS_DLQ) {
+                    throw new Error(`The job status is ${job.status} you can retry when status is ${StatusesEnum.STATUS_FAILED} or ${StatusesEnum.STATUS_DLQ} `);
+                }
+
+                await JobModel.update(['status'], ['id'], {status: StatusesEnum.STATUS_PENDING, id: id})
+
+                logger.info(`Job ${job.id} retried`)
+                return {
+                    id: job.id,
+                    status: StatusesEnum.STATUS_PENDING,
+                };
 
 
-            return job as JobGetType;
+            } else {
+                throw new Error(`Job with id ${id} not found`);
+            }
 
         } catch (err) {
-
             logger.error("Database error in JobService.get:", err);
             throw err;
 
         }
+
     }
 
+    /**
+     * @param id
+     */
+    async cancel(id: number): Promise<JobRetryType> {
+
+        try {
+
+            const job: JobType | undefined = await JobModel.getJobById(id, ['id', 'status'])
+
+            if (job) {
+                if (
+                    job.status !== StatusesEnum.STATUS_PENDING &&
+                    job.status !== StatusesEnum.STATUS_QUEUED &&
+                    job.status !== StatusesEnum.STATUS_SCHEDULED
+                ) {
+                    throw new Error(`The job status is ${job.status} you can cancel when status is ${StatusesEnum.STATUS_PROCESSING} | ${StatusesEnum.STATUS_SCHEDULED} | ${StatusesEnum.STATUS_QUEUED} `);
+                }
+
+                await JobModel.update(['status'], ['id'], {status: StatusesEnum.STATUS_CANCELED, id: id})
+
+                logger.info(`Job ${job.id} canceled`)
+                return {
+                    id: job.id,
+                    status: StatusesEnum.STATUS_PENDING,
+                };
+
+
+            } else {
+                throw new Error(`Job with id ${id} not found`);
+            }
+
+        } catch (err) {
+            logger.error("Database error in JobService.get:", err);
+            throw err;
+
+        }
+
+    }
 
     /**
      * @param queryParams
@@ -115,54 +144,17 @@ export default class JobService {
      */
     async list(queryParams: Record<string, any>): Promise<JobsResponseType> {
 
-        const db = await initDB();
+        const {limit, cursor} = queryParams;
 
-        const {tenant_id, status, limit, cursor} = queryParams;
-
-        const conditions: string[] = []
-        const values: any[] = []
-
-
-        let isWhere = false;
-
-        if (tenant_id) {
-            conditions.push('tenant_id = ?')
-            values.push(tenant_id)
-
-            isWhere = true;
-        }
-
-        if (status) {
-            conditions.push('status = ?')
-            values.push(status)
-
-            isWhere = true;
-        }
-
-        let where: string = ""
-        if (isWhere) {
-            where = `WHERE ${conditions.join(' AND ')}`
-        }
-
-        let limitQuery: string = ""
-        if (limit && cursor) {
-            limitQuery = `LIMIT  ${limit} OFFSET ${cursor}`;
-
-        } else if (limit) {
-            limitQuery = `LIMIT  ${limit}`;
-        }
-
-        const sql = `
-            SELECT id, status, created_at
-            FROM jobs ${where}
-            ORDER BY id DESC
-                ${limitQuery}`;
-
-        const jobs: Job[] | undefined = await db?.all(sql, values);
+        const jobs: Job[] = JobModel.getJobsList(queryParams, ['id', 'status', 'created_at'])
 
         let next_cursor: number | undefined = limit && !cursor ? limit : limit && cursor ? parseInt(limit) + parseInt(cursor) : 0;
 
-        if (jobs?.length && jobs?.length < parseInt(limit)) {
+        if (jobs?.length > 1) {
+            if (jobs?.length && jobs?.length < parseInt(limit)) {
+                next_cursor = undefined;
+            }
+        } else if (jobs?.length <= 0) {
             next_cursor = undefined;
         }
 

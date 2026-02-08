@@ -21,9 +21,32 @@ router.get('/jobs/:id',
     JobController.job
 )
 
-router.put('/jobs/:id',
-    JobController.job
+
+//TODO when pools is ready then return
+router.get('/jobs/:id/attempts',
+    validateParams(z.object({
+        id: z.coerce.number()
+    })),
+    JobController.attempts
 )
+
+router.get('/jobs/:id/retry',
+    validateParams(z.object({
+        id: z.coerce.number()
+    })),
+    JobController.retry
+)
+
+router.get('/jobs/:id/cancel',
+    validateParams(z.object({
+        id: z.coerce.number()
+    })),
+    JobController.cancel
+)
+
+// router.put('/jobs/:id',
+//     JobController.job
+// )
 
 router.post('/jobs',
     validate(createJobSchema),

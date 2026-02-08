@@ -1,4 +1,6 @@
 import type {Knex} from "knex";
+import {StatusesEnum} from "../src/enums/statuses.enum";
+
 
 
 export async function up(knex: Knex): Promise<void> {
@@ -6,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
         table.increments("id").primary();
         table.string("tenant_id").notNullable();
         table.string("type").notNullable();
-        table.enum("status", ['pending', 'scheduled', 'queued', 'processing', 'success', 'dlq'])
+        table.enum("status", ['pending', 'scheduled', 'queued', 'processing', 'success', 'dlq', 'failed', StatusesEnum.STATUS_CANCELED])
             .notNullable().defaultTo('pending');//pending|scheduled|queued|processing|success|dlq
         table.integer("payload_order_id").nullable();
         table.string("payload_status").nullable();
@@ -29,8 +31,8 @@ export async function up(knex: Knex): Promise<void> {
 
 
         table.index(["tenant_id", "status"], "idx_tenant_status");
-        table.index(["dedupe_key", "created_at"],    "idx_dedupe");
-        table.index(["tenant_id", "idempotency_key"],    "idx_idempotency");
+        table.index(["dedupe_key", "created_at"], "idx_dedupe");
+        table.index(["tenant_id", "idempotency_key"], "idx_idempotency");
     });
 }
 

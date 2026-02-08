@@ -8,6 +8,7 @@ import {JobGetType} from "../types/job.get.type";
 import {JobParserUtility} from "../utils/job.parser.utlity";
 import {JobType} from "../types/job.type";
 import {JobsResponseType} from "../types/jobs.respose.type";
+import {JobRetryType} from "../types/job.retry.type";
 
 
 class JobController {
@@ -56,6 +57,12 @@ class JobController {
 
             const job = await jobService.get(Number(id))
 
+            if (!job) {
+                return res.status(401).json({
+                    statusCode: 401,
+                    message: `Job #${id} not found`
+                });
+            }
             return res.status(200).json(JobParserUtility(job as unknown as JobType));
 
         } catch (e: any) {
@@ -71,7 +78,123 @@ class JobController {
      * @param req
      * @param res
      */
+    async attempts(
+        req: Request,
+        res: Response<JobGetType | ErrorResponseInterface>
+    ): Promise<Response> {
+
+        try {
+
+            const {id} = req.params;
+            const jobService = new JobService()
+
+            const job = await jobService.get(Number(id))
+
+            return res.status(200).json(JobParserUtility(job as unknown as JobType));
+
+        } catch (e: any) {
+
+            return res.status(401).json({
+                statusCode: 401,
+                message: e.message || 'unknown error'
+            });
+        }
+    }
+
+    /**
+     * @param req
+     * @param res
+     */
+    async retry(
+        req: Request,
+        res: Response<JobRetryType | ErrorResponseInterface>
+    ): Promise<Response> {
+
+        try {
+
+            const {id} = req.params;
+
+            const jobService = new JobService()
+
+            const job = await jobService.retry(Number(id))
+
+            return res.status(200).json(job);
+
+        } catch (e: any) {
+
+            return res.status(401).json({
+                statusCode: 401,
+                message: e.message || 'unknown error'
+            });
+        }
+    }
+
+    /**
+     * @param req
+     * @param res
+     */
+    async cancel(
+        req: Request,
+        res: Response<JobRetryType | ErrorResponseInterface>
+    ): Promise<Response> {
+
+        try {
+
+            const {id} = req.params;
+
+            const jobService = new JobService()
+
+            const job = await jobService.cancel(Number(id))
+
+            return res.status(200).json(job);
+
+        } catch (e: any) {
+
+            return res.status(401).json({
+                statusCode: 401,
+                message: e.message || 'unknown error'
+            });
+        }
+    }
+
+    /**
+     * @param req
+     * @param res
+     */
     async addJob(
+        req: Request,
+        res: Response<JobCreateResponseType | ErrorResponseInterface>
+    ): Promise<any> {
+
+        try {
+
+            const jobService = new JobService()
+
+            jobService.create(req.body as JobCreateDataType).then(data => {
+                //TODO add in pool heap
+
+                return res.status(200).json({
+                    id: data?.id,
+                    status: data.status
+                })
+
+            }).catch(err => {
+
+                return res.status(401).json({statusCode: 401, message: err.message})
+            })
+
+        } catch (e: any) {
+            return res.status(401).json({
+                statusCode: 401,
+                message: e.message || 'unknown error'
+            });
+        }
+    }
+    /**
+     * @param req
+     * @param res
+     */
+    async addJobOld(
         req: Request,
         res: Response<JobCreateResponseType | ErrorResponseInterface>
     ): Promise<any> {

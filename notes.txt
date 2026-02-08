@@ -8,3 +8,4 @@ Create
 
 npx knex migrate:make create_users_table -x ts
 
+npx knex migrate:make create_job_attempts_table -x ts
