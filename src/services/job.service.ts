@@ -7,6 +7,8 @@ import {StatusesEnum} from "../enums/statuses.enum";
 import {JobRetryType} from "../types/job.retry.type";
 import JobModel from "../controllers/models/job.model";
 import {JobType} from "../types/job.type";
+import AttemptModel from "../controllers/models/attempt.model";
+import {AttemptTypeResponse} from "../types/job.attempts.type";
 
 export default class JobService {
 
@@ -161,6 +163,23 @@ export default class JobService {
         return {
             items: jobs,
             next_cursor: next_cursor
+        }
+    }
+
+
+    /**
+     * @param id
+     */
+    async attempts(id: number): Promise<AttemptTypeResponse[]> {
+
+        try {
+
+            return AttemptModel.getJobAttempts(id)
+
+        } catch (err) {
+
+            logger.error("Database error in JobService.get:", err);
+            throw err;
         }
     }
 }

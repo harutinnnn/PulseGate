@@ -1,5 +1,6 @@
 import {Router} from "express";
 import JobController from "../../controllers/job.controller";
+import AttemptController from "../../controllers/attempt.controller";
 
 import {validate, validateParams, validateQueryString} from "../../middleware/validate";
 import {createJobSchema} from "../../schemas/create.job.schema";
@@ -22,12 +23,11 @@ router.get('/jobs/:id',
 )
 
 
-//TODO when pools is ready then return
 router.get('/jobs/:id/attempts',
     validateParams(z.object({
         id: z.coerce.number()
     })),
-    JobController.attempts
+    AttemptController.list
 )
 
 router.get('/jobs/:id/retry',

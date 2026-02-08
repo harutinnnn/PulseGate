@@ -88,7 +88,7 @@ class JobController {
             const {id} = req.params;
             const jobService = new JobService()
 
-            const job = await jobService.get(Number(id))
+            const job = await jobService.attempts(Number(id))
 
             return res.status(200).json(JobParserUtility(job as unknown as JobType));
 
