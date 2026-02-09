@@ -2,10 +2,8 @@ import {Router} from "express";
 import JobController from "../../controllers/job.controller";
 import AttemptController from "../../controllers/attempt.controller";
 
-import {validate, validateParams, validateQueryString} from "../../middleware/validate";
+import {validate} from "../../middleware/validate";
 import {createJobSchema} from "../../schemas/create.job.schema";
-import {z} from 'zod';
-import {JobListSchema} from "../../schemas/job.list.schema";
 import {AppContext} from "../../interfaces/app.context.interface";
 
 export const jobRoute = (context: AppContext) => {

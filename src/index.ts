@@ -6,6 +6,7 @@ import type {Server} from 'http';
 import TaskScheduler from "./queue/taskScheduler";
 import {AppContext} from "./interfaces/app.context.interface";
 import JobRepository from "./repositories/job.repository";
+import {DedupeCache} from "./utils/dedupe.cache.utility";
 
 let server: Server;
 let taskScheduler: TaskScheduler;
@@ -14,9 +15,14 @@ let isShuttingDown = false;
 async function main(): Promise<void> {
 
     const jobRepo = new JobRepository(db);
+    const dedupeCache = new DedupeCache(
+        Number(process.env.DEDUPE_CACHE_SIZE || 10000),
+        Number(process.env.DEDUPE_WINDOW_SECONDS || 3600)
+    );
 
     const context: AppContext = {
-        jobRepo
+        jobRepo,
+        dedupeCache
     };
 
     taskScheduler = new TaskScheduler(context);

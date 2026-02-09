@@ -49,7 +49,6 @@ export const createJobSchema = z.object({
 
     dedupe_key: z.string().min(1).optional(),
 
-    // ISO string → Date (v4-correct, not deprecated)
     execute_at: z.coerce.date().optional(),
 
     retry: retrySchema.optional(),

@@ -144,7 +144,7 @@ export default class JobRepository {
     updateStatus(id: string, status: StatusesEnum, lastError?: string): void {
         const stmt = this.db.prepare(`
             UPDATE jobs
-            SET status = ?,
+            SET status     = ?,
                 updated_at = ?,
                 last_error = ?
             WHERE id = ?
@@ -160,12 +160,20 @@ export default class JobRepository {
     retry(id: string, status: StatusesEnum, lastError?: string): void {
         const stmt = this.db.prepare(`
             UPDATE jobs
-            SET status = ?,
-                updated_at = ?,
-                last_error = ?,
+            SET status           = ?,
+                updated_at       = ?,
+                last_error       = ?,
                 current_attempts = 0
             WHERE id = ?
         `);
         stmt.run(status, new Date().toISOString(), lastError || null, id);
+    }
+
+
+    findByDedupeKey(key: string): JobType | undefined {
+        const stmt = this.db.prepare('SELECT * FROM jobs WHERE dedupe_key = ? ORDER BY created_at DESC LIMIT 1');
+        const row = stmt.get(key) as any;
+        if (!row) return undefined;
+        return row;
     }
 }

@@ -1,7 +1,6 @@
 import {Request, Response} from "express";
 import {ErrorResponseInterface} from "../types/error.responce.type";
 import logger from '../config/logger';
-import JobService from "../services/job.service";
 import {JobGetType} from "../types/job.get.type";
 import {JobParserUtility, parseBodyToJobData} from "../utils/job.parser.utlity";
 import {JobType} from "../types/job.type";
@@ -29,7 +28,7 @@ export default class JobController {
     ) => {
 
 
-        const {dedupe_key} = req.params;
+        const {dedupe_key} = req.body;
 
         try {
 
@@ -46,21 +45,24 @@ export default class JobController {
 
 
             //Check Deduplication Key
-            /*if (dedupe_key) {
-                const existingJobId = context.dedupe.check(dedupe_key);
+            if (dedupe_key) {
+
+                const existingJobId = this.context.dedupeCache.check(dedupe_key);
+
                 if (existingJobId) {
-                    const job = context.repo.get(existingJobId);
+                    const job = this.context.jobRepo.get(existingJobId);
                     if (job) {
                         return res.status(200).json(job);
                     }
                 }
 
-                const dbJob = context.repo.findByDedupeKey(dedupe_key);
+                const dbJob = this.context.jobRepo.findByDedupeKey(dedupe_key);
+
                 if (dbJob) {
-                    context.dedupe.set(dedupe_key, dbJob.id);
+                    this.context.dedupeCache.set(dedupe_key, dbJob.id);
                     return res.status(200).json(dbJob);
                 }
-            }*/
+            }
 
 
             //Parsing data for insert
@@ -69,6 +71,10 @@ export default class JobController {
             // Create job
             const createdJob = this.jobRepo.create(jobData);
 
+            // Update dedupe cache
+            if (dedupe_key) {
+                this.context.dedupeCache.set(dedupe_key, createdJob.id);
+            }
 
             //TODO job scheduling
 
@@ -150,33 +156,6 @@ export default class JobController {
      * @param req
      * @param res
      */
-    async attempts(
-        req: Request,
-        res: Response<JobGetType | ErrorResponseInterface>
-    ): Promise<Response> {
-
-        try {
-
-            const {id} = req.params;
-            const jobService = new JobService()
-
-            const job = await jobService.attempts(id.toString())
-
-            return res.status(200).json(JobParserUtility(job as unknown as JobType));
-
-        } catch (e: any) {
-
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
-        }
-    }
-
-    /**
-     * @param req
-     * @param res
-     */
     retry = async (
         req: Request<{ id: string }>,
         res: Response
@@ -202,8 +181,8 @@ export default class JobController {
             //TODO job set queue
 
 
-            logger.info(`Job ${id} retried manually`, { job_id: id });
-            return res.json({ id, status: 'queued' });
+            logger.info(`Job ${id} retried manually`, {job_id: id});
+            return res.json({id, status: 'queued'});
 
         } catch (e: any) {
 
