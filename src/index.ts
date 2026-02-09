@@ -1,9 +1,10 @@
-import app from './app';
+import {createApp} from './app';
 import logger from './config/logger';
 import db from './db';
 
 import type {Server} from 'http';
 import TaskScheduler from "./queue/taskScheduler";
+import {AppContext} from "./interfaces/app.context.interface";
 
 let server: Server;
 let taskScheduler: TaskScheduler;
@@ -11,7 +12,15 @@ let isShuttingDown = false;
 
 async function main(): Promise<void> {
 
+    const context: AppContext = {
+        db: db
+    };
 
+    taskScheduler = new TaskScheduler(context);
+    taskScheduler.start()
+
+
+    const app = createApp(context);
     // Start server
     const PORT = Number(process.env.PORT) || 3000;
 
@@ -21,9 +30,6 @@ async function main(): Promise<void> {
 
 
     // Start workers and scheduler
-
-    taskScheduler = new TaskScheduler(db);
-    taskScheduler.start()
 
 
     //Shootdown
