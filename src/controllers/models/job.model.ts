@@ -11,7 +11,7 @@ export default class JobModel {
     /**
      * @param id
      */
-    static getJobById(id: number, select: string[] = ['*']): JobType | undefined {
+    static getJobById(id: string, select: string[] = ['*']): JobType | undefined {
 
         const stmt = db.prepare(`
             SELECT ${select.join(', ')}

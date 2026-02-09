@@ -3,14 +3,16 @@ import 'dotenv/config';
 import {checkDbReady} from "./db/index";
 import './config/database';
 import {register, httpRequestDuration, httpRequestTotal} from './config/metrics'
-import {JobApi} from './routes/v1/index';
+import {jobRoute} from './routes/v1/job';
 import {AppContext} from "./interfaces/app.context.interface";
 import cors from 'cors';
+import {healthCheck, metricsHandler, readinessCheck} from "./routes/health";
 
 export const createApp = (context: AppContext) => {
 
 
     const app = express();
+
 
 
     // CORS configuration
@@ -42,32 +44,13 @@ export const createApp = (context: AppContext) => {
         next()
     })
 
-    app.get('/metrics', async (_req, res) => {
-        res.set('Content-Type', register.contentType)
-        res.end(await register.metrics())
-    })
+
+    app.use('/v1', jobRoute(context))
 
 
-    app.get('/healthz', (_req, res) => {
-        res.status(200).json({status: 'ok'})
-    })
-
-    app.get('/readyz', async (_req, res) => {
-        if (checkDbReady()) {
-            res.status(200).json({
-                status: 'ready',
-                db: 'up',
-            })
-        } else {
-            return res.status(503).json({
-                status: 'not-ready',
-                db: 'down',
-            })
-        }
-    })
-
-    app.use('/v1', JobApi)
-
+    app.get('/healthz', healthCheck);
+    app.get('/readyz', readinessCheck);
+    app.get('/metrics', metricsHandler);
 
     return app;
 }

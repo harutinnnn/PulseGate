@@ -5,6 +5,7 @@ import db from './db';
 import type {Server} from 'http';
 import TaskScheduler from "./queue/taskScheduler";
 import {AppContext} from "./interfaces/app.context.interface";
+import JobRepository from "./repositories/job.repository";
 
 let server: Server;
 let taskScheduler: TaskScheduler;
@@ -12,13 +13,14 @@ let isShuttingDown = false;
 
 async function main(): Promise<void> {
 
+    const jobRepo = new JobRepository(db);
+
     const context: AppContext = {
-        db: db
+        jobRepo
     };
 
     taskScheduler = new TaskScheduler(context);
     taskScheduler.start()
-
 
     const app = createApp(context);
     // Start server

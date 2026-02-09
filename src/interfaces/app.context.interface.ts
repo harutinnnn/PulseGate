@@ -1,5 +1,5 @@
-import Database from "better-sqlite3";
+import JobRepository from "../repositories/job.repository";
 
 export interface AppContext {
-    db: Database.Database;
+    jobRepo: JobRepository;
 }

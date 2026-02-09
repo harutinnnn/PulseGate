@@ -1,6 +1,6 @@
 import db from "../../db";
 import {AttemptType} from "../../types/attempt.type";
-import {AttemptTypeResponse} from "../../types/job.attempts.type";
+import {Attempt} from "../../types/job.attempts.type";
 
 
 export default class AttemptModel {
@@ -20,7 +20,7 @@ export default class AttemptModel {
 
     }
 
-    static getJobAttempts(jobId: number): AttemptTypeResponse[] {
+    static getJobAttempts(jobId: string): Attempt[] {
 
         const stmt = db.prepare(`
             SELECT *
@@ -30,7 +30,7 @@ export default class AttemptModel {
 
         return stmt.all({
             job_id: Number(jobId).toString()
-        }) as AttemptTypeResponse[];
+        }) as Attempt[];
 
 
     }

@@ -26,11 +26,12 @@ export type JobCreateDataType = {
     type: string;
     payload: PayloadType;
     destination: DestinationType;
-    dedupe_key?: string;
-    execute_at?: string;
-    retry?: RetryConfigType;
-    rate_limit?: RateLimitConfigType;
+    dedupe_key: string;
+    execute_at: string;
+    retry: RetryConfigType;
+    rate_limit: RateLimitConfigType;
     last_error: string;
+    idempotency_key: string
 };
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';

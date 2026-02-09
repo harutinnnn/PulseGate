@@ -2,32 +2,118 @@ import {Request, Response} from "express";
 import {ErrorResponseInterface} from "../types/error.responce.type";
 import logger from '../config/logger';
 import JobService from "../services/job.service";
-import {JobCreateResponseType} from "../types/job.create.response.type";
-import {JobCreateDataType} from "../types/job.create.data.type";
 import {JobGetType} from "../types/job.get.type";
-import {JobParserUtility} from "../utils/job.parser.utlity";
+import {JobParserUtility, parseBodyToJobData} from "../utils/job.parser.utlity";
 import {JobType} from "../types/job.type";
-import {JobsResponseType} from "../types/jobs.respose.type";
-import {JobRetryType} from "../types/job.retry.type";
+import {AppContext} from "../interfaces/app.context.interface";
+import JobRepository from "../repositories/job.repository";
+import {JobStatus} from "../interfaces/job.interface";
+import {JobListSchema} from "../schemas/job.list.schema";
+import {StatusesEnum} from "../enums/statuses.enum";
 
 
-class JobController {
+export default class JobController {
+    public jobRepo: JobRepository;
+
+    constructor(private context: AppContext) {
+        this.jobRepo = context.jobRepo;
+    }
 
     /**
      * @param req
      * @param res
      */
-    async jobs(
+    addJob = async (
         req: Request,
-        res: Response<JobsResponseType | ErrorResponseInterface>
-    ): Promise<Response> {
+        res: Response
+    ) => {
+
+
+        const {dedupe_key} = req.params;
 
         try {
-            const jobService = new JobService()
 
-            const list: JobsResponseType = await jobService.list(req.query)
 
-            return res.status(200).json(list);
+            //Check Idempotency Key
+            const idempotencyKey = req.headers['idempotency-key'] as string;
+
+            if (idempotencyKey) {
+                const existingJob = this.jobRepo.findByIdempotencyKey(req.body.tenant_id, idempotencyKey)
+                if (existingJob) {
+                    return res.status(200).json(existingJob)
+                }
+            }
+
+
+            //Check Deduplication Key
+            /*if (dedupe_key) {
+                const existingJobId = context.dedupe.check(dedupe_key);
+                if (existingJobId) {
+                    const job = context.repo.get(existingJobId);
+                    if (job) {
+                        return res.status(200).json(job);
+                    }
+                }
+
+                const dbJob = context.repo.findByDedupeKey(dedupe_key);
+                if (dbJob) {
+                    context.dedupe.set(dedupe_key, dbJob.id);
+                    return res.status(200).json(dbJob);
+                }
+            }*/
+
+
+            //Parsing data for insert
+            const jobData = parseBodyToJobData(req.body, idempotencyKey)
+
+            // Create job
+            const createdJob = this.jobRepo.create(jobData);
+
+
+            //TODO job scheduling
+
+
+            return res.status(201).json(createdJob);
+
+        } catch (e: any) {
+            return res.status(401).json({
+                statusCode: 401,
+                message: e.message || 'unknown error'
+            });
+        }
+    }
+
+    /**
+     * @param req
+     * @param res
+     */
+    jobs = async (
+        req: Request,
+        res: Response
+    ) => {
+
+        try {
+
+            const result = JobListSchema.safeParse(req.query);
+            if (!result.success) {
+                return res.status(400).json({error: {message: 'Validation failed', details: result.error.issues}});
+            }
+
+            const {tenant_id, limit, cursor, status, type} = result.data;
+
+
+            const {jobs, nextCursor} = this.context.jobRepo.list({
+                tenantId: tenant_id,
+                limit,
+                cursor,
+                status: status as JobStatus | undefined,
+                type
+            });
+
+            return res.status(200).json({
+                items: jobs,
+                next_cursor: nextCursor
+            });
 
         } catch (e: any) {
 
@@ -45,33 +131,19 @@ class JobController {
      * @param req
      * @param res
      */
-    async job(
-        req: Request,
-        res: Response<JobGetType | ErrorResponseInterface>
-    ): Promise<Response> {
+    job = async (
+        req: Request<{ id: string }>,
+        res: Response
+    ) => {
 
-        try {
+        const {id} = req.params;
+        const job = this.context.jobRepo.get(id);
 
-            const {id} = req.params;
-            const jobService = new JobService()
-
-            const job = await jobService.get(Number(id))
-
-            if (!job) {
-                return res.status(401).json({
-                    statusCode: 401,
-                    message: `Job #${id} not found`
-                });
-            }
-            return res.status(200).json(JobParserUtility(job as unknown as JobType));
-
-        } catch (e: any) {
-
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
+        if (!job) {
+            return res.status(404).json({error: {message: 'Job not found'}});
         }
+
+        return res.json(job);
     }
 
     /**
@@ -88,7 +160,7 @@ class JobController {
             const {id} = req.params;
             const jobService = new JobService()
 
-            const job = await jobService.attempts(Number(id))
+            const job = await jobService.attempts(id.toString())
 
             return res.status(200).json(JobParserUtility(job as unknown as JobType));
 
@@ -105,27 +177,38 @@ class JobController {
      * @param req
      * @param res
      */
-    async retry(
-        req: Request,
-        res: Response<JobRetryType | ErrorResponseInterface>
-    ): Promise<Response> {
+    retry = async (
+        req: Request<{ id: string }>,
+        res: Response
+    ) => {
+
+        const {id} = req.params;
+
+        const job = this.context.jobRepo.get(id);
+
+        if (!job) {
+            return res.status(404).json({error: {message: 'Job not found'}});
+        }
+
+        if (!['failed', 'dlq'].includes(job.status)) {
+            return res.status(409).json({error: {message: `Cannot retry job in ${job.status} state`}});
+        }
 
         try {
 
-            const {id} = req.params;
+            this.context.jobRepo.retry(id, StatusesEnum.STATUS_QUEUED);
 
-            const jobService = new JobService()
 
-            const job = await jobService.retry(Number(id))
+            //TODO job set queue
 
-            return res.status(200).json(job);
+
+            logger.info(`Job ${id} retried manually`, { job_id: id });
+            return res.json({ id, status: 'queued' });
 
         } catch (e: any) {
 
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
+            logger.error(`Error retrying job ${id}`, {error: e.message});
+            return res.status(500).json({error: {message: 'Internal Server Error'}});
         }
     }
 
@@ -133,96 +216,36 @@ class JobController {
      * @param req
      * @param res
      */
-    async cancel(
-        req: Request,
-        res: Response<JobRetryType | ErrorResponseInterface>
-    ): Promise<Response> {
+    cancel = async (
+        req: Request<{ id: string }>,
+        res: Response
+    ) => {
+
+        const {id} = req.params;
+        const job = this.context.jobRepo.get(id);
+
+        if (!job) {
+            return res.status(404).json({error: {message: 'Job not found'}});
+        }
+
+        if (['processing', 'success', 'dlq', 'canceled'].includes(job.status)) {
+            return res.status(409).json({error: {message: `Cannot cancel job in ${job.status} state`}});
+        }
+
 
         try {
 
-            const {id} = req.params;
+            this.context.jobRepo.updateStatus(id, StatusesEnum.STATUS_CANCELED);
+            logger.info(`Job ${id} cancelled`, {job_id: id});
 
-            const jobService = new JobService()
+            return res.json({id, status: 'cancelled'});
 
-            const job = await jobService.cancel(Number(id))
+        } catch (error: any) {
 
-            return res.status(200).json(job);
-
-        } catch (e: any) {
-
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
+            logger.error(`Error cancelling job ${id}`, {error: error.message});
+            return res.status(500).json({error: {message: 'Internal Server Error'}});
         }
-    }
 
-    /**
-     * @param req
-     * @param res
-     */
-    async addJob(
-        req: Request,
-        res: Response<JobCreateResponseType | ErrorResponseInterface>
-    ): Promise<any> {
 
-        try {
-
-            const jobService = new JobService()
-
-            jobService.create(req.body as JobCreateDataType).then(data => {
-                //TODO add in pool heap
-
-                return res.status(200).json({
-                    id: data?.id,
-                    status: data.status
-                })
-
-            }).catch(err => {
-
-                return res.status(401).json({statusCode: 401, message: err.message})
-            })
-
-        } catch (e: any) {
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
-        }
-    }
-    /**
-     * @param req
-     * @param res
-     */
-    async addJobOld(
-        req: Request,
-        res: Response<JobCreateResponseType | ErrorResponseInterface>
-    ): Promise<any> {
-
-        try {
-
-            const jobService = new JobService()
-
-            jobService.create(req.body as JobCreateDataType).then(data => {
-                //TODO add in pool heap
-
-                return res.status(200).json({
-                    id: data?.id,
-                    status: data.status
-                })
-
-            }).catch(err => {
-
-                return res.status(401).json({statusCode: 401, message: err.message})
-            })
-
-        } catch (e: any) {
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
-        }
     }
 }
-
-export default new JobController();

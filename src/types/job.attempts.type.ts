@@ -1,12 +1,16 @@
 export type JobAttemptsResponse = {
-    items: AttemptTypeResponse[],
+    items: Attempt[],
 }
 
 
-export type AttemptTypeResponse = {
-    n: number,
-    started_at: Date | null,
-    finished_at: Date | null,
-    http_status?: number | null,
-    error: string | null,
+export type Attempt = {
+    id?: number;
+    job_id: string;
+    attempt_number: number;
+    started_at: Date;
+    finished_at?: Date;
+    status: 'success' | 'failed';
+    http_status?: number;
+    error?: string;
+    response_body?: string;
 }

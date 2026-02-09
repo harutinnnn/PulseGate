@@ -1,18 +1,21 @@
 import {Request, Response} from "express";
 import {ErrorResponseInterface} from "../types/error.responce.type";
-import logger from '../config/logger';
 import JobService from "../services/job.service";
-import {JobCreateResponseType} from "../types/job.create.response.type";
-import {JobCreateDataType} from "../types/job.create.data.type";
 import {JobGetType} from "../types/job.get.type";
 import {JobParserUtility} from "../utils/job.parser.utlity";
 import {JobType} from "../types/job.type";
-import {JobsResponseType} from "../types/jobs.respose.type";
-import {JobRetryType} from "../types/job.retry.type";
-import {AttemptTypeResponse, JobAttemptsResponse} from "../types/job.attempts.type";
+
+import JobRepository from "../repositories/job.repository";
+import {AppContext} from "../interfaces/app.context.interface";
 
 
 class AttemptController {
+
+    public jobRepo: JobRepository;
+
+    constructor(private context: AppContext) {
+        this.jobRepo = context.jobRepo;
+    }
 
     /**
      * @param req
@@ -28,7 +31,7 @@ class AttemptController {
             const {id} = req.params;
             const jobService = new JobService()
 
-            const job = await jobService.get(Number(id))
+            const job = await jobService.get(id.toString())
 
             if (!job) {
                 return res.status(401).json({
@@ -51,32 +54,28 @@ class AttemptController {
      * @param req
      * @param res
      */
-    async list(
-        req: Request,
-        res: Response<JobAttemptsResponse | ErrorResponseInterface>
-    ): Promise<Response> {
+    list = async (
+        req: Request<{ id: string }>,
+        res: Response
+    ) => {
 
-        try {
 
-            const {id} = req.params;
-            const jobService = new JobService()
+        const {id} = req.params;
 
-            const attempts: AttemptTypeResponse[] = await jobService.attempts(Number(id))
 
-            return res.status(200).json({
-                items: attempts
-            });
+        const job = this.context.jobRepo.get(id);
 
-        } catch (e: any) {
-
-            return res.status(401).json({
-                statusCode: 401,
-                message: e.message || 'unknown error'
-            });
+        if (!job) {
+            return res.status(404).json({error: {message: 'Job not found'}});
         }
+
+        const attempts = this.context.jobRepo.getAttempts(id);
+
+        return res.json(attempts);
+
     }
 
 
 }
 
-export default new AttemptController();
+export default AttemptController;

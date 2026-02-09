@@ -8,7 +8,8 @@ import {JobRetryType} from "../types/job.retry.type";
 import JobModel from "../controllers/models/job.model";
 import {JobType} from "../types/job.type";
 import AttemptModel from "../controllers/models/attempt.model";
-import {AttemptTypeResponse} from "../types/job.attempts.type";
+import {Attempt} from "../types/job.attempts.type";
+import {nanoid} from "nanoid";
 
 export default class JobService {
 
@@ -22,28 +23,50 @@ export default class JobService {
 
             try {
 
+                const id = nanoid();
+
+
                 const jonData: Record<string, any> = {
-                    tenant_id: data.tenant_id,
-                    type: data.type,
-                    status: StatusesEnum.STATUS_PENDING,
-                    payload_order_id: data.payload.order_id,
-                    payload_status: data.payload.status,
-                    destination_url: data.destination.url,
-                    destination_method: data.destination.method,
-                    destination_headers: Object.entries(data.destination.headers || {})
-                        .map(([key, value]) => `${key}:${value}`)
-                        .join(';'),
-                    destination_timeout_ms: data.destination.timeout_ms,
-                    dedupe_key: data.dedupe_key,
-                    execute_at: data.execute_at,
-                    created_at: new Date(),
-                    updated_at: new Date(),
-                    max_attempts: data.retry?.max_attempts,
-                    base_delay_ms: data.retry?.base_delay_ms,
-                    max_delay_ms: data.retry?.max_delay_ms,
-                    current_attempts: 0,
-                    rate_limit_rps: data.rate_limit?.rps,
-                    rate_limit_burst: data.rate_limit?.burst,
+                    id: id, tenant_id:
+                    data.tenant_id,
+                    type:
+                    data.type,
+                    status:
+                    StatusesEnum.STATUS_PENDING,
+                    payload_order_id:
+                    data.payload.order_id,
+                    payload_status:
+                    data.payload.status,
+                    destination_url:
+                    data.destination.url,
+                    destination_method:
+                    data.destination.method,
+                    destination_headers:
+                        Object.entries(data.destination.headers || {})
+                            .map(([key, value]) => `${key}:${value}`)
+                            .join(';'),
+                    destination_timeout_ms:
+                    data.destination.timeout_ms,
+                    dedupe_key:
+                    data.dedupe_key,
+                    execute_at:
+                    data.execute_at,
+                    created_at:
+                        new Date(),
+                    updated_at:
+                        new Date(),
+                    max_attempts:
+                    data.retry?.max_attempts,
+                    base_delay_ms:
+                    data.retry?.base_delay_ms,
+                    max_delay_ms:
+                    data.retry?.max_delay_ms,
+                    current_attempts:
+                        0,
+                    rate_limit_rps:
+                    data.rate_limit?.rps,
+                    rate_limit_burst:
+                    data.rate_limit?.burst,
                 }
 
                 const lid = JobModel.create(jonData)
@@ -61,14 +84,14 @@ export default class JobService {
     /**
      * @param id
      */
-    async get(id: number): Promise<JobGetType | any> {
-        return JobModel.getJobById(id)
+    async get(id: string): Promise<JobGetType | any> {
+        return JobModel.getJobById(id, ['*'])
     }
 
     /**
      * @param id
      */
-    async retry(id: number): Promise<JobRetryType> {
+    async retry(id: string): Promise<JobRetryType> {
 
         try {
 
@@ -104,7 +127,7 @@ export default class JobService {
     /**
      * @param id
      */
-    async cancel(id: number): Promise<JobRetryType> {
+    async cancel(id: string): Promise<JobRetryType> {
 
         try {
 
@@ -122,9 +145,10 @@ export default class JobService {
                 await JobModel.update(['status'], ['id'], {status: StatusesEnum.STATUS_CANCELED, id: id})
 
                 logger.info(`Job ${job.id} canceled`)
+
                 return {
                     id: job.id,
-                    status: StatusesEnum.STATUS_PENDING,
+                    status: StatusesEnum.STATUS_CANCELED,
                 };
 
 
@@ -170,7 +194,7 @@ export default class JobService {
     /**
      * @param id
      */
-    async attempts(id: number): Promise<AttemptTypeResponse[]> {
+    async attempts(id: string): Promise<Attempt[]> {
 
         try {
 

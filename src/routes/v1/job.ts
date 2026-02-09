@@ -6,51 +6,47 @@ import {validate, validateParams, validateQueryString} from "../../middleware/va
 import {createJobSchema} from "../../schemas/create.job.schema";
 import {z} from 'zod';
 import {JobListSchema} from "../../schemas/job.list.schema";
+import {AppContext} from "../../interfaces/app.context.interface";
 
-const router = Router();
+export const jobRoute = (context: AppContext) => {
 
+    const jobController = new JobController(context);
+    const attemptController = new AttemptController(context);
 
-router.get('/jobs',
-    validateQueryString(JobListSchema),
-    JobController.jobs
-)
-
-router.get('/jobs/:id',
-    validateParams(z.object({
-        id: z.coerce.number()
-    })),
-    JobController.job
-)
+    const router = Router();
 
 
-router.get('/jobs/:id/attempts',
-    validateParams(z.object({
-        id: z.coerce.number()
-    })),
-    AttemptController.list
-)
+    router.post('/jobs',
+        validate(createJobSchema),
+        jobController.addJob
+    )
 
-router.get('/jobs/:id/retry',
-    validateParams(z.object({
-        id: z.coerce.number()
-    })),
-    JobController.retry
-)
 
-router.get('/jobs/:id/cancel',
-    validateParams(z.object({
-        id: z.coerce.number()
-    })),
-    JobController.cancel
-)
+    router.get('/jobs',
+        jobController.jobs
+    )
 
-// router.put('/jobs/:id',
-//     JobController.job
-// )
+    router.get('/jobs/:id',
+        jobController.job
+    )
 
-router.post('/jobs',
-    validate(createJobSchema),
-    JobController.addJob
-)
 
-export default router;
+    router.get('/jobs/:id/attempts',
+        attemptController.list
+    )
+
+
+    router.get('/jobs/:id/cancel',
+        jobController.cancel
+    )
+
+
+    router.get('/jobs/:id/retry',
+        jobController.retry
+    )
+
+
+
+    return router
+
+}

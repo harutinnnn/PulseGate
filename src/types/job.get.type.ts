@@ -1,5 +1,5 @@
 export type     JobGetType = {
-    id: number,
+    id: string,
     tenant_id: string,
     type: string,
     status: string,

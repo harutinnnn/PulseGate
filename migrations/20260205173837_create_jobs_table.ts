@@ -5,7 +5,7 @@ import {StatusesEnum} from "../src/enums/statuses.enum";
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable("jobs", (table) => {
-        table.increments("id").primary();
+        table.string("id").primary();
         table.string("tenant_id").notNullable();
         table.string("type").notNullable();
         table.enum("status", ['pending', 'scheduled', 'queued', 'processing', 'success', 'dlq', 'failed', StatusesEnum.STATUS_CANCELED])
