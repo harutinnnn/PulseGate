@@ -1,8 +1,4 @@
-import express, {NextFunction, Request, Response} from 'express'
-import https, {ServerOptions as HttpsServerOptions} from 'https'
-import http, {IncomingMessage, ServerResponse} from 'http'
-import fs from 'fs'
-import path from 'path'
+import express from 'express'
 import 'dotenv/config';
 import {checkDbReady} from "./db/index";
 import './config/database';
@@ -17,9 +13,7 @@ export const createApp = (context: AppContext) => {
     const app = express();
 
 
-
-
-// CORS configuration
+    // CORS configuration
     const corsOptions = {
         origin: '*',
         methods: 'GET,POST,PUT,DELETE',
@@ -47,7 +41,6 @@ export const createApp = (context: AppContext) => {
 
         next()
     })
-
 
     app.get('/metrics', async (_req, res) => {
         res.set('Content-Type', register.contentType)

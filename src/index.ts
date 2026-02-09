@@ -23,7 +23,6 @@ async function main(): Promise<void> {
     const app = createApp(context);
     // Start server
     const PORT = Number(process.env.PORT) || 3000;
-
     server = app.listen(PORT, '0.0.0.0', () => {
         logger.info(`Running on http://localhost:${PORT}`);
     });
