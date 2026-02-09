@@ -2,9 +2,11 @@ import app from './app';
 import logger from './config/logger';
 import db from './db';
 
-import type { Server } from 'http';
+import type {Server} from 'http';
+import TaskScheduler from "./queue/taskScheduler";
 
 let server: Server;
+let taskScheduler: TaskScheduler;
 let isShuttingDown = false;
 
 async function main(): Promise<void> {
@@ -20,6 +22,8 @@ async function main(): Promise<void> {
 
     // Start workers and scheduler
 
+    taskScheduler = new TaskScheduler(db);
+    taskScheduler.start()
 
 
     //Shootdown
@@ -38,6 +42,8 @@ async function shutdown(signal: string): Promise<void> {
         //Close server
         await closeServer(server);
 
+        //Close task scheduler
+        taskScheduler.stop();
         //Close db
         await closeDb();
 
@@ -46,7 +52,7 @@ async function shutdown(signal: string): Promise<void> {
 
     } catch (err) {
 
-        logger.error('Shutdown failed', { error: err });
+        logger.error('Shutdown failed', {error: err});
         process.exit(1);
     }
 }
@@ -72,6 +78,6 @@ async function closeDb(): Promise<void> {
 }
 
 main().catch((err) => {
-    logger.error('Fatal error', { error: err });
+    logger.error('Fatal error', {error: err});
     process.exit(1);
 });
