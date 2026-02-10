@@ -7,7 +7,7 @@ export type AttemptType = {
     started_at: Date,
     finished_at: Date,
     status: StatusesEnum.STATUS_SUCCESS | StatusesEnum.STATUS_FAILED,
-    http_status?: number,
+    http_status?: number | null,
     error?: string,
     response_body?: string | null,
 }

@@ -1,18 +1,15 @@
 import {Job} from "../interfaces/job.interface";
 import {AttemptType} from "../types/attempt.type";
 import {StatusesEnum} from "../enums/statuses.enum";
+import {JobType} from "../types/job.type";
+import {RateLimitManager} from "../utils/rate.limit.manager";
 
 export class DeliveryService {
 
-    async deliver(job: Job): Promise<AttemptType> {
+    constructor(private rateLimiter: RateLimitManager) {
+    }
 
-        //const allowed = someUtility;
-        const allowed = true;
-
-        if (!allowed) {
-            throw new Error('rate_limited');
-        }
-
+    async deliver(job: JobType): Promise<AttemptType> {
 
         try {
             const url = new URL(job.destination_url)
@@ -27,12 +24,21 @@ export class DeliveryService {
         const timeout = setTimeout(() => controller.abort(), job.destination_timeout_ms);
         const startTime = new Date();
 
-
         try {
+
+            const headers: Record<string, any> = Object.fromEntries(
+                job.destination_headers
+                    .split(';')
+                    .map(part => {
+                        const [key, ...rest] = part.split(':');
+                        return [key.trim(), rest.join(':').trim()];
+                    })
+            );
+
             const response = await fetch(job.destination_url, {
                 method: job.destination_method,
-                headers: job.destination_headers,
-                body: JSON.stringify(job.payload),
+                headers: headers,
+                body: JSON.stringify({payload_order_id: job.payload_order_id, payload_status: job.payload_status}),
                 signal: controller.signal,
             })
 
@@ -45,7 +51,8 @@ export class DeliveryService {
                 finished_at: new Date(),
                 status: response.ok ? StatusesEnum.STATUS_SUCCESS : StatusesEnum.STATUS_FAILED,
                 http_status: response.status,
-                response_body: responseBody
+                response_body: responseBody,
+                error: ""
             }
 
         } catch (error: any) {
@@ -56,6 +63,8 @@ export class DeliveryService {
                 started_at: startTime,
                 finished_at: new Date(),
                 status: StatusesEnum.STATUS_FAILED,
+                http_status: null,
+                response_body: null,
                 error: error.name === 'AbortError' ? 'timeout' : error.message
             };
 

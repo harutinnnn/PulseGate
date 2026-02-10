@@ -1,8 +1,7 @@
 import express from 'express'
 import 'dotenv/config';
-import {checkDbReady} from "./db/index";
 import './config/database';
-import {register, httpRequestDuration, httpRequestTotal} from './config/metrics'
+import {httpRequestDuration, httpRequestTotal} from './config/metrics'
 import {jobRoute} from './routes/v1/job';
 import {AppContext} from "./interfaces/app.context.interface";
 import cors from 'cors';
@@ -12,8 +11,6 @@ export const createApp = (context: AppContext) => {
 
 
     const app = express();
-
-
 
     // CORS configuration
     const corsOptions = {

@@ -1,9 +1,6 @@
 import {Request, Response} from "express";
-import {ErrorResponseInterface} from "../types/error.responce.type";
 import logger from '../config/logger';
-import {JobGetType} from "../types/job.get.type";
-import {JobParserUtility, parseBodyToJobData} from "../utils/job.parser.utlity";
-import {JobType} from "../types/job.type";
+import {parseBodyToJobData} from "../utils/job.parser.utlity";
 import {AppContext} from "../interfaces/app.context.interface";
 import JobRepository from "../repositories/job.repository";
 import {JobStatus} from "../interfaces/job.interface";
@@ -76,8 +73,21 @@ export default class JobController {
                 this.context.dedupeCache.set(dedupe_key, createdJob.id);
             }
 
-            //TODO job scheduling
+            //Put job in queue
+            if (jobData.execute_at < new Date()) {
 
+                const enqueued = this.context.queue.enqueue(createdJob)
+                if (enqueued) {
+                    this.context.jobRepo.updateStatus(createdJob.id, StatusesEnum.STATUS_QUEUED);
+                    createdJob.status = StatusesEnum.STATUS_QUEUED;
+                    logger.info(`Job ${createdJob.id} enqueued`, {job_id: createdJob.id});
+                } else {
+                    logger.warn(`Job ${createdJob.id} queue full, scheduled for later`, {job_id: createdJob.id});
+                }
+
+            } else {
+                logger.info(`Job ${createdJob.id} scheduled for ${createdJob.execute_at.toISOString()}`, {job_id: createdJob.id});
+            }
 
             return res.status(201).json(createdJob);
 

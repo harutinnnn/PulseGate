@@ -3,8 +3,9 @@ import {nanoid} from "nanoid";
 import {Database} from "better-sqlite3";
 import {StatusesEnum} from "../enums/statuses.enum";
 import {Job} from "../types/jobs.respose.type";
-import {JobAttemptsResponse} from "../types/job.attempts.type";
+import {Attempt, JobAttemptsResponse} from "../types/job.attempts.type";
 import {JobStatus} from "../interfaces/job.interface";
+import {AttemptType} from "../types/attempt.type";
 
 export default class JobRepository {
 
@@ -176,4 +177,58 @@ export default class JobRepository {
         if (!row) return undefined;
         return row;
     }
+
+
+    createAttempt(attempt: Omit<AttemptType, 'id'>): void {
+
+        try{
+
+
+        const stmt = this.db.prepare(`
+            INSERT INTO attempts (job_id, attempt_number, started_at, finished_at, status,
+                                  http_status, error, response_body)
+            VALUES (@job_id, @attempt_number, @started_at, @finished_at, @status,
+                    @http_status, @error, @response_body)
+        `);
+
+        stmt.run({
+            ...attempt,
+            started_at: attempt.started_at.toISOString(),
+            finished_at: attempt.finished_at ? attempt.finished_at.toISOString() : null
+        });
+        }catch(e){
+            console.error(e);
+        }
+    }
+
+
+    incrementAttempts(id: string, nextExecuteAt?: Date): void {
+        let query = 'UPDATE jobs SET current_attempts = current_attempts + 1, updated_at = ?';
+        const params: any[] = [new Date().toISOString()];
+
+        if (nextExecuteAt) {
+            query += ', execute_at = ?, status = ?';
+            params.push(nextExecuteAt.toISOString(), 'scheduled');
+        }
+
+        query += ' WHERE id = ?';
+        params.push(id);
+
+        this.db.prepare(query).run(...params);
+    }
+
+
+    getReadyJobs(limit: number): JobType[] {
+        const now = new Date().toISOString();
+        const stmt = this.db.prepare(`
+            SELECT *
+            FROM jobs
+            WHERE status = 'scheduled'
+              AND execute_at <= ?
+            ORDER BY execute_at ASC LIMIT ?
+        `);
+        return stmt.all(now, limit) as any[];
+    }
+
+
 }
