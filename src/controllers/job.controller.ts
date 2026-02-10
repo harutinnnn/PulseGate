@@ -24,11 +24,9 @@ export default class JobController {
         res: Response
     ) => {
 
-
         const {dedupe_key} = req.body;
 
         try {
-
 
             //Check Idempotency Key
             const idempotencyKey = req.headers['idempotency-key'] as string;
@@ -40,12 +38,13 @@ export default class JobController {
                 }
             }
 
-
             //Check Deduplication Key
             if (dedupe_key) {
 
+                //check isf exists in LRUCache
                 const existingJobId = this.context.dedupeCache.check(dedupe_key);
 
+                //if exists getting from db and return
                 if (existingJobId) {
                     const job = this.context.jobRepo.get(existingJobId);
                     if (job) {
@@ -53,8 +52,10 @@ export default class JobController {
                     }
                 }
 
+                //check in db by dedup key
                 const dbJob = this.context.jobRepo.findByDedupeKey(dedupe_key);
 
+                //if exists return and set in LRUCache
                 if (dbJob) {
                     this.context.dedupeCache.set(dedupe_key, dbJob.id);
                     return res.status(200).json(dbJob);
@@ -73,12 +74,16 @@ export default class JobController {
                 this.context.dedupeCache.set(dedupe_key, createdJob.id);
             }
 
-            //Put job in queue
+            //Put job in queue if execute_at < Date now
             if (jobData.execute_at < new Date()) {
 
+                //Push in queue(enque)
                 const enqueued = this.context.queue.enqueue(createdJob)
+
+                //if enqueued update job status to queued
                 if (enqueued) {
                     this.context.jobRepo.updateStatus(createdJob.id, StatusesEnum.STATUS_QUEUED);
+                    //change status on new one(queued)
                     createdJob.status = StatusesEnum.STATUS_QUEUED;
                     logger.info(`Job ${createdJob.id} enqueued`, {job_id: createdJob.id});
                 } else {
@@ -92,6 +97,7 @@ export default class JobController {
             return res.status(201).json(createdJob);
 
         } catch (e: any) {
+
             return res.status(401).json({
                 statusCode: 401,
                 message: e.message || 'unknown error'

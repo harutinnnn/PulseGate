@@ -19,11 +19,15 @@ let scheduler: DelayScheduler;
 
 async function main(): Promise<void> {
 
+    //Job repository
     const jobRepo = new JobRepository(db);
+
+    //LRUCache dedup cache
     const dedupeCache = new DedupeCache(
         Number(process.env.DEDUPE_CACHE_SIZE || 10000),
         Number(process.env.DEDUPE_WINDOW_SECONDS || 3600)
     );
+
 
     const queue = new MemoryQueue(Number(process.env.QUEUE_CAPACITY) || 10000);
     const rateLimit = new RateLimitManager();
@@ -101,7 +105,6 @@ function closeServer(server: Server): Promise<void> {
         });
     });
 }
-
 
 async function closeDb(): Promise<void> {
     if (!db) return;

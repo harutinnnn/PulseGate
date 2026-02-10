@@ -37,8 +37,6 @@ export class WorkerPool {
                 } catch (error: any) {
                     console.error(error);
                     logger.error(`Worker ${id} error processing job ${job.id}`, {error: error.message});
-                    // In case of critical error, ensure job state is updated?
-                    // processJob handles job state updates.
                 }
             } else {
                 // Wait for new job or timeout

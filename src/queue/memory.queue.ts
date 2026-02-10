@@ -21,8 +21,4 @@ export class MemoryQueue extends EventEmitter {
     dequeue(): JobType | undefined {
         return this.jobs.shift();
     }
-
-    get depth(): number {
-        return this.jobs.length;
-    }
 }
