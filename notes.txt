@@ -9,3 +9,21 @@ Create
 npx knex migrate:make create_users_table -x ts
 
 npx knex migrate:make create_job_attempts_table -x ts
+
+
+=========================================================
+Docker setup
+docker build   --build-arg REPO_URL=github.com/harutinnnn/PulseGate.git   -t my-node-app .
+
+docker run -p 8080:8080 my-node-app
+
+=========================================================
+Docker kill process|container
+
+sudo docker inspect -f '{{.State.Pid}}' 1d850832bf64
+
+sudo kill -9 <PID_FROM_ABOVE>
+sudo docker rm -f 1d850832bf64
+
+
+docker exec -it 4424a2d39d7a ls -l /usr/src/app
