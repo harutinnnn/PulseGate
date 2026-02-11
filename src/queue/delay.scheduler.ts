@@ -57,7 +57,6 @@ export class DelayScheduler {
                 }
             }
         } catch (error: any) {
-            console.error(error);
             logger.error('Error in scheduler tick', { error: error.message });
         }
     }

@@ -1,8 +1,12 @@
 import Database from 'better-sqlite3';
+import path from "path";
 
-const db: Database.Database = new Database('./database.db', {
-    // verbose: console.log,
-});
+const db: Database.Database = new Database(
+    path.join(__dirname, "../../database.db"),
+    // './database.db',
+    {
+        // verbose: console.log,
+    });
 
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
