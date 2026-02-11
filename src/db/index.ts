@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import path from "path";
 
 const db: Database.Database = new Database(
-    path.join(__dirname, "../../database.db"),
+    path.join(__dirname, "../../database.sqlite"),
     // './database.db',
     {
         // verbose: console.log,
