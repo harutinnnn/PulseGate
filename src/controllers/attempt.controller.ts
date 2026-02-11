@@ -2,7 +2,6 @@ import {Request, Response} from "express";
 import JobRepository from "../repositories/job.repository";
 import {AppContext} from "../interfaces/app.context.interface";
 
-
 class AttemptController {
 
     public jobRepo: JobRepository;
@@ -20,9 +19,7 @@ class AttemptController {
         res: Response
     ) => {
 
-
         const {id} = req.params;
-
 
         const job = this.context.jobRepo.get(id);
 
@@ -33,10 +30,7 @@ class AttemptController {
         const attempts = this.context.jobRepo.getAttempts(id);
 
         return res.json(attempts);
-
     }
-
-
 }
 
 export default AttemptController;

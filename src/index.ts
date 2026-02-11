@@ -55,6 +55,8 @@ async function main(): Promise<void> {
         logger.info(`Running on http://localhost:${PORT}`);
     });
 
+    // seedJob()
+
 
     // Start workers and scheduler
     workers.start()

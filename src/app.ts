@@ -1,11 +1,14 @@
 import express from 'express'
 import 'dotenv/config';
-import './config/database';
 import {httpRequestDuration, httpRequestTotal} from './config/metrics'
-import {jobRoute} from './routes/v1/job';
+import {jobRoute} from './routes/job';
 import {AppContext} from "./interfaces/app.context.interface";
 import cors from 'cors';
 import {healthCheck, metricsHandler, readinessCheck} from "./routes/health";
+
+
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger";
 
 export const createApp = (context: AppContext) => {
 
@@ -42,12 +45,13 @@ export const createApp = (context: AppContext) => {
     })
 
 
-    app.use('/v1', jobRoute(context))
-
-
     app.get('/healthz', healthCheck);
     app.get('/readyz', readinessCheck);
     app.get('/metrics', metricsHandler);
+
+    app.use('/v1', jobRoute(context))
+
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     return app;
 }

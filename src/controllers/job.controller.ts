@@ -7,7 +7,6 @@ import {JobStatus} from "../interfaces/job.interface";
 import {JobListSchema} from "../schemas/job.list.schema";
 import {StatusesEnum} from "../enums/statuses.enum";
 
-
 export default class JobController {
     public jobRepo: JobRepository;
 
@@ -61,7 +60,6 @@ export default class JobController {
                     return res.status(200).json(dbJob);
                 }
             }
-
 
             //Parsing data for insert
             const jobData = parseBodyToJobData(req.body, idempotencyKey)
@@ -123,7 +121,6 @@ export default class JobController {
 
             const {tenant_id, limit, cursor, status, type} = result.data;
 
-
             const {jobs, nextCursor} = this.context.jobRepo.list({
                 tenantId: tenant_id,
                 limit,
@@ -147,7 +144,6 @@ export default class JobController {
             });
         }
     }
-
 
     /**
      * @param req
@@ -192,10 +188,6 @@ export default class JobController {
         try {
 
             this.context.jobRepo.retry(id, StatusesEnum.STATUS_QUEUED);
-
-
-            //TODO job set queue
-
 
             logger.info(`Job ${id} retried manually`, {job_id: id});
             return res.json({id, status: 'queued'});
