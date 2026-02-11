@@ -7,7 +7,7 @@ A comprehensive webhook dispatch service with reliability, observability, and ad
 ### Quick Start with Docker Compose
 
 1. Clone the repository
-2. Run `docker-compose up -d`
+2. Run `docker compose up --build`
 3. Access the API at http://localhost:8080
 
 ### Environment Variables
@@ -31,5 +31,3 @@ curl -X POST http://localhost:8080/v1/jobs \
     }
   }'
 ```
-
-See `openapi/openapi.yaml` for full API definition.

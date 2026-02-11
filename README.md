@@ -1,18 +1,5 @@
 # PulseGate
 
-A production-ready webhook dispatch service with reliability, observability, and advanced features.
-
-## Features
-
-- ✅ **Reliable Delivery**: Exponential backoff retry logic with configurable attempts
-- ✅ **Scheduled Execution**: Delay job execution to future timestamps
-- ✅ **Deduplication**: LRU+TTL cache to prevent duplicate processing
-- ✅ **Idempotency**: Key-based request deduplication
-- ✅ **Rate Limiting**: Token bucket algorithm per destination
-- ✅ **Dead Letter Queue**: Failed jobs isolation for manual review
-- ✅ **Observability**: Prometheus metrics and structured JSON logging
-- ✅ **Graceful Shutdown**: No job loss on SIGTERM/SIGINT
-
 ## Quick Start
 
 ### Prerequisites
@@ -128,15 +115,15 @@ curl -X POST http://localhost:8080/v1/jobs/{job_id}/retry
 
 Environment variables (see `.env.example`):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 8080 | HTTP server port |
-| `DATABASE_PATH` | ./pulsegate.db | SQLite database file path |
-| `QUEUE_CAPACITY` | 10000 | Max in-memory queue size |
-| `WORKER_CONCURRENCY` | 20 | Number of concurrent workers |
-| `SCHEDULER_POLL_INTERVAL_MS` | 5000 | How often to poll for scheduled jobs |
-| `DEDUPE_WINDOW_SECONDS` | 3600 | Deduplication cache TTL |
-| `LOG_LEVEL` | info | Log level (debug, info, warn, error) |
+| Variable | Default | Description                                |
+|----------|---------|--------------------------------------------|
+| `PORT` | 8080 | HTTP server port                           |
+| `DATABASE_PATH` | ./database.sqlite | SQLite database file path                  |
+| `QUEUE_CAPACITY` | 10000 | Max in-memory queue size                   |
+| `WORKER_CONCURRENCY` | 20 | Number of concurrent workers               |
+| `SCHEDULER_POLL_INTERVAL_MS` | 5000 | How often to poll for scheduled jobs       |
+| `DEDUPE_WINDOW_SECONDS` | 3600 | Deduplication cache TTL                    |
+| `LOG_LEVEL` | info | Log level (debug, info, warn, http, error) |
 
 ## Monitoring
 
@@ -154,29 +141,8 @@ Prometheus metrics available at `GET /metrics`:
 - `pulsegate_jobs_created_total` - Total jobs created
 - `pulsegate_jobs_completed_total` - Jobs by final status
 - `pulsegate_delivery_duration_seconds` - Webhook delivery latency
-
-## Architecture
-
-```
-┌─────────┐    ┌──────────┐    ┌───────────┐    ┌────────┐
-│ API     │───▶│ Validator│───▶│ Scheduler │───▶│ Queue  │
-│ Server  │    │ + Dedupe │    │ (Min-Heap)│    │ (FIFO) │
-└─────────┘    └──────────┘    └───────────┘    └────────┘
-                                                      │
-                                                      ▼
-┌──────────┐   ┌──────────┐   ┌──────────────┐   ┌────────┐
-│ Database │◀──│  Worker  │◀──│ Rate Limiter │◀──│ Worker │
-│ (SQLite) │   │   Pool   │   │ (Token       │   │  Pool  │
-└──────────┘   └──────────┘   │  Bucket)     │   └────────┘
-                               └──────────────┘
-```
-
+ 
 ## Documentation
 
 - [Design Decisions](docs/DESIGN.md)
 - [Operational Runbook](docs/RUNBOOK.md)
-- [API Reference](openapi/openapi.yaml)
-
-## License
-
-MIT

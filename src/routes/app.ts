@@ -1,14 +1,14 @@
 import express from 'express'
 import 'dotenv/config';
-import {httpRequestDuration, httpRequestTotal} from './config/metrics'
-import {jobRoute} from './routes/job';
-import {AppContext} from "./interfaces/app.context.interface";
+import {httpRequestDuration, httpRequestTotal} from '../config/metrics'
+import {jobRoute} from './job';
+import {AppContext} from "../interfaces/app.context.interface";
 import cors from 'cors';
-import {healthCheck, metricsHandler, readinessCheck} from "./routes/health";
+import {healthCheck, metricsHandler, readinessCheck} from "./health";
 
 
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./swagger";
+import { swaggerSpec } from "../swagger";
 
 export const createApp = (context: AppContext) => {
 

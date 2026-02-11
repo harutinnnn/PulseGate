@@ -1,4 +1,4 @@
-import {createApp} from './app';
+import {createApp} from './routes/app';
 import logger from './config/logger';
 import db from './db';
 

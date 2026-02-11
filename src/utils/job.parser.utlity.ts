@@ -32,7 +32,6 @@ export function parseBodyToJobData(
     return {
         tenant_id: data.tenant_id,
         type: data.type,
-        // status: StatusesEnum.STATUS_PENDING,
         status: StatusesEnum.STATUS_SCHEDULED,
         payload_order_id: data.payload.order_id,
         payload_status: data.payload.status,
