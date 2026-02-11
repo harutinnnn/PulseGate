@@ -30,7 +30,6 @@ const body = {
 
 async function sendRequest() {
     body.dedupe_key = nanoid();
-    // console.log('body.dedupe_key', body.dedupe_key);
     return fetch(URL, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
