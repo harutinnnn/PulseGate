@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 ARG REPO_URL
 
 # Clone the repository (Public URL version)
-RUN git clone https://${REPO_URL} .
+RUN git clone https://github.com/harutinnnn/PulseGate.git .
 
 # Install ALL dependencies (needed for building)
 RUN npm install

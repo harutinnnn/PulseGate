@@ -17,6 +17,16 @@ docker build   --build-arg REPO_URL=github.com/harutinnnn/PulseGate.git   -t my-
 
 docker run -p 8080:8080 my-node-app
 
+docker run -p 8080:8080 \
+  -v $(pwd)/my-data:/home/harut/Desktop/Docker/new \
+  my-node-app
+
+
+docker cp e529218e1998:/usr/src/app ./my-app-backup
+
+docker build --no-cache \
+  --build-arg REPO_URL=github.com/harutinnnn/PulseGate.git \
+  -t my-node-app .
 =========================================================
 Docker kill process|container
 

@@ -1,5 +1,7 @@
-import type { Knex } from "knex";
+import type {Knex} from "knex";
 import path from "path";
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const config: { [key: string]: Knex.Config } = {
     development: {
@@ -10,7 +12,7 @@ const config: { [key: string]: Knex.Config } = {
         useNullAsDefault: true,
         migrations: {
             extension: "ts",
-            directory: "./migrations"
+            directory: isProd ? './migrations' : './migrations/*.ts',
         }
     }
 };
