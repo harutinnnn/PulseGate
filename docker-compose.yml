@@ -1,13 +1,20 @@
 version: '3.8'
+
 services:
-  pulsegate:
-    build: .
+  app:
+    # Build from the Dockerfile in the current directory
+    build:
+      context: .
+      # If you want to force git to update, you usually need --no-cache
+      # But basic "up --build" works with this context.
+
+    # Map port 8080 on your computer to 8080 in the container
     ports:
-      - "8081:8080"
-    environment:
-      - PORT=8080
-      - DATABASE_PATH=/database.db
-      - WORKER_CONCURRENCY=10
+      - "8080:8080"
+
+    # Automatically restart the container if it crashes
+    restart: always
+
+    # (Optional) Save your database locally so you don't lose data
     volumes:
-      - .:/app
-    restart: unless-stopped
+      - ./my-db-data:/usr/src/app/data
