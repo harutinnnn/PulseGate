@@ -5,8 +5,7 @@ const config: { [key: string]: Knex.Config } = {
     development: {
         client: "sqlite3",
         connection: {
-            filename: './database.db'
-            // filename: path.join(__dirname, "database.db")
+            filename: path.join(__dirname, "database.db")
         },
         useNullAsDefault: true,
         migrations: {
