@@ -60,6 +60,7 @@ async function main(): Promise<void> {
 
     // Start workers and scheduler
     workers.start()
+
     scheduler.start(Number(process.env.WORKER_CONCURRENCY || 5000));
 
     //Shootdown

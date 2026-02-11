@@ -20,6 +20,7 @@ export class DelayScheduler {
     }
 
     start(pollMs: number = 5000): void {
+
         if (this.running) return;
         this.running = true;
         logger.info(`Starting delay scheduler with poll interval ${pollMs}ms`);
@@ -36,7 +37,7 @@ export class DelayScheduler {
         if (!this.running) return;
 
         try {
-            // 1. Fetch ready jobs from DB (status=scheduled, execute_at <= now)
+            //1. Fetch jobs from DB "status=scheduled, execute_at <= now"
             const limit = 100;
             const jobs = this.repo.getReadyJobs(limit);
 

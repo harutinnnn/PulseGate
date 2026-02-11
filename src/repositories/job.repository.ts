@@ -223,7 +223,7 @@ export default class JobRepository {
         const stmt = this.db.prepare(`
             SELECT *
             FROM jobs
-            WHERE status = 'scheduled'
+            WHERE status = '${StatusesEnum.STATUS_SCHEDULED}'
               AND execute_at <= ?
             ORDER BY execute_at ASC LIMIT ?
         `);
