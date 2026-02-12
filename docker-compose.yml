@@ -1,20 +1,12 @@
-version: '3.8'
+version: "3.9"
 
 services:
   app:
-    # Build from the Dockerfile in the current directory
     build:
       context: .
-      # If you want to force git to update, you usually need --no-cache
-      # But basic "up --build" works with this context.
-
-    # Map port 8080 on your computer to 8080 in the container
+      dockerfile: Dockerfile
+      args:
+        REPO_URL: https://github.com/youruser/yourrepo.git
+        BRANCH: main
     ports:
       - "8080:8080"
-
-    # Automatically restart the container if it crashes
-    restart: always
-
-    # (Optional) Save your database locally so you don't lose data
-    volumes:
-      - ./my-db-data:/usr/src/app/data

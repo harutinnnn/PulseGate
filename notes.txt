@@ -33,4 +33,5 @@ docker compose up
 
 
 docker build --build-arg REPO_URL=https://github.com/youruser/yourrepo.git -t my-node-app .
+docker build  --no-cache -t my-node-app .
 docker run -p 8080:8080 my-node-app
