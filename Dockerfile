@@ -47,4 +47,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 #CMD ["/bin/sh", "-c", "npx knex migrate:latest && node dist/index.js"]
-CMD ["/bin/sh", "-c", "migrate.js && node dist/index.js"]
+CMD ["/bin/sh", "-c", "migrate.ts && node dist/index.js"]
