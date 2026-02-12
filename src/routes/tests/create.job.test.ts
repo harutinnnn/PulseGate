@@ -4,7 +4,7 @@ import {AppContext} from "../../interfaces/app.context.interface";
 import JobRepository from "../../repositories/job.repository";
 import {DedupeCache} from "../../utils/dedupe.cache.utility";
 import {MemoryQueue} from "../../queue/memory.queue";
-import {createJobHandler} from "./createJobHandler";
+import {createJobHandler} from "../createJobHandler";
 import {Request, Response} from "express";
 import {parseBodyToJobData} from "../../utils/job.parser.utlity";
 import {JobCreateDataType} from "../../types/job.create.data.type";

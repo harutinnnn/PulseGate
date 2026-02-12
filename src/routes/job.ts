@@ -5,7 +5,7 @@ import AttemptController from "../controllers/attempt.controller";
 import {validate} from "../middleware/validate";
 import {createJobSchema} from "../schemas/create.job.schema";
 import {AppContext} from "../interfaces/app.context.interface";
-import {createJobHandler} from "./tests/createJobHandler";
+import {createJobHandler} from "./createJobHandler";
 
 export const jobRoute = (context: AppContext) => {
 

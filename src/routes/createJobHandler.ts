@@ -1,5 +1,5 @@
-import {AppContext} from "../../interfaces/app.context.interface";
-import {parseBodyToJobData} from "../../utils/job.parser.utlity";
+import {AppContext} from "../interfaces/app.context.interface";
+import {parseBodyToJobData} from "../utils/job.parser.utlity";
 import {Request, Response} from "express";
 
 export const createJobHandler =
