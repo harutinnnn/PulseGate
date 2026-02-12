@@ -29,12 +29,21 @@ const body = {
 };
 
 async function sendRequest() {
-    body.dedupe_key = nanoid();
-    return fetch(URL, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(body),
-    });
+    try {
+
+        body.dedupe_key = nanoid();
+        return fetch(URL, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(body),
+        });
+    } catch (e) {
+        if(e instanceof Error) {
+            console.error(e.message);
+        }else{
+            console.error('Unknown error occurred');
+        }
+    }
 }
 
 async function stressTest(totalRequests = 1000, concurrency = 100) {
@@ -43,14 +52,22 @@ async function stressTest(totalRequests = 1000, concurrency = 100) {
     console.log(`Starting stress test...`);
 
     for (let i = 0; i < batches; i++) {
-        const promises = [];
+       try{
+           const promises = [];
 
-        for (let j = 0; j < concurrency; j++) {
-            promises.push(sendRequest());
-        }
+           for (let j = 0; j < concurrency; j++) {
+               promises.push(sendRequest());
+           }
 
-        await Promise.all(promises);
-        console.log(`Batch ${i + 1}/${batches} done`);
+           await Promise.all(promises);
+           console.log(`Batch ${i + 1}/${batches} done`);
+       } catch (e) {
+           if(e instanceof Error) {
+               console.error(e.message);
+           }else{
+               console.error('Unknown error occurred');
+           }
+       }
     }
 
     console.log("Stress test completed");

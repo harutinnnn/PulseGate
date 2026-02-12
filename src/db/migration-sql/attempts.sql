@@ -13,6 +13,6 @@ create table if not exists attempts
     response_body  varchar(255)
 );
 
-create index idx_job_attempts
+create index if not exists idx_job_attempts
     on attempts (job_id, attempt_number);
 

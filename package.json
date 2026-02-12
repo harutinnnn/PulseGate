@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "migrate": "ts-node migration.ts"
   },
   "keywords": [],
   "author": "",

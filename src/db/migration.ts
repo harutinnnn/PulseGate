@@ -3,7 +3,7 @@ import path from "path";
 import * as fs from "node:fs";
 import logger from "../config/logger";
 
-export const migrateTmpDb = (db: Database.Database) => {
+export const migrateDb = (db: Database.Database) => {
 
     const migrationFiles = fs.readdirSync(path.join(__dirname, 'migration-sql')).sort();
 

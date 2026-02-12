@@ -1,12 +1,12 @@
 import Database from 'better-sqlite3';
 import path from "path";
 import {JobType} from "../types/job.type";
-import {migrateTmpDb} from "./migration.tmp";
+import {migrateDb} from "./migration";
 
 export async function createTestDatabase(): Promise<Database.Database> {
     const db: Database.Database = new Database(':memory:');
 
-    migrateTmpDb(db);
+    migrateDb(db);
 
     return db;
 }

@@ -46,4 +46,5 @@ RUN mkdir -p /usr/src/app/data
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["/bin/sh", "-c", "npx knex migrate:latest && node dist/index.js"]
+#CMD ["/bin/sh", "-c", "npx knex migrate:latest && node dist/index.js"]
+CMD ["/bin/sh", "-c", "dist/migrate.js && node dist/index.js"]

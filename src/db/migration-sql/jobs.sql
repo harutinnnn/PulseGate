@@ -26,15 +26,15 @@ create table if not exists jobs
     check (`status` in ('pending', 'scheduled', 'queued', 'processing', 'success', 'dlq', 'failed', 'canceled'))
 );
 
-create index idx_dedupe
+create index if not exists idx_dedupe
     on jobs (dedupe_key, created_at);
 
-create index idx_idempotency
+create index if not exists idx_idempotency
     on jobs (tenant_id, idempotency_key);
 
-create index idx_tenant_status
+create index if not exists idx_tenant_status
     on jobs (tenant_id, status);
 
-create index jobs_execute_at_index
+create index if not exists jobs_execute_at_index
     on jobs (execute_at);
 
