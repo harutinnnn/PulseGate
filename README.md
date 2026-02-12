@@ -13,6 +13,9 @@
 # Install dependencies
 npm install
 
+# Migrate database
+nom run migrate
+
 # Build the project
 npm run build
 

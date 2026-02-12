@@ -1,16 +1,3 @@
-Migration commands
-
-npx knex migrate:latest
-npx knex migrate:up
-npx knex migrate:down
-
-Create
-
-npx knex migrate:make create_users_table -x ts
-
-npx knex migrate:make create_job_attempts_table -x ts
-
-
 =========================================================
 Docker setup
 docker build   --build-arg REPO_URL=github.com/harutinnnn/PulseGate.git   -t my-node-app .

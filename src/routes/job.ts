@@ -6,6 +6,7 @@ import {validate} from "../middleware/validate";
 import {createJobSchema} from "../schemas/create.job.schema";
 import {AppContext} from "../interfaces/app.context.interface";
 import {createJobHandler} from "./createJobHandler";
+import {getJobHandler} from "./tests/get.job.handler";
 
 export const jobRoute = (context: AppContext) => {
 
@@ -139,7 +140,7 @@ export const jobRoute = (context: AppContext) => {
      *         description: Job not found
      */
     router.get('/jobs/:id',
-        jobController.job
+        getJobHandler(context)
     )
 
 

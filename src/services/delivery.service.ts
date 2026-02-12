@@ -1,4 +1,3 @@
-import {Job} from "../interfaces/job.interface";
 import {AttemptType} from "../types/attempt.type";
 import {StatusesEnum} from "../enums/statuses.enum";
 import {JobType} from "../types/job.type";
