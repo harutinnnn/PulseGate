@@ -12,7 +12,7 @@ const config: { [key: string]: Knex.Config } = {
         useNullAsDefault: true,
         migrations: {
             extension: "ts",
-            directory: isProd ? './migrations' : './migrations/migrations',
+            directory: !isProd ? './migrations' : './migrations/migrations',
         }
     }
 };

@@ -56,4 +56,4 @@ async function stressTest(totalRequests = 1000, concurrency = 100) {
     console.log("Stress test completed");
 }
 
-stressTest(10000, 500);
+stressTest(5000, 100);

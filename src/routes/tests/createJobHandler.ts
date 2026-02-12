@@ -14,7 +14,6 @@ export const createJobHandler =
                 if (idempotencyKey) {
                     const existingJob = context.jobRepo.findByIdempotencyKey(req.body.tenant_id, idempotencyKey)
                     if (existingJob) {
-                        console.log('status:200');
                         return res.status(200).json(existingJob)
                     }
                 }
@@ -30,7 +29,6 @@ export const createJobHandler =
                     if (existingJobId) {
                         const job = context.jobRepo.get(existingJobId);
                         if (job) {
-                            console.log('status:200');
                             return res.status(200).json(job);
                         }
                     }
@@ -41,7 +39,6 @@ export const createJobHandler =
                     //if exists return and set in LRUCache
                     if (dbJob) {
                         context.dedupeCache.set(dedupe_key, dbJob.id);
-                        console.log('status:200');
                         return res.status(200).json(dbJob);
                     }
                 }
@@ -49,11 +46,9 @@ export const createJobHandler =
                 const jobData = parseBodyToJobData(req.body, idempotencyKey)
 
                 const newJob = context.jobRepo.create(jobData);
-                console.log('status:201');
                 return res.status(201).json(newJob);
 
             } catch (e) {
-                console.log('status:500');
                 return res.status(500).json({error: {message: 'Internal Server Error'}});
             }
 

@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import {createTestJob, cleanDatabase, closeDatabase, createTestDatabase} from '../../db/testDb'
+import {cleanDatabase, closeDatabase, createTestDatabase} from '../../db/testDb'
 import {AppContext} from "../../interfaces/app.context.interface";
 import JobRepository from "../../repositories/job.repository";
 import {DedupeCache} from "../../utils/dedupe.cache.utility";

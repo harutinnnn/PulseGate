@@ -3,8 +3,7 @@ import {nanoid} from "nanoid";
 import {Database} from "better-sqlite3";
 import {StatusesEnum} from "../enums/statuses.enum";
 import {Job} from "../types/jobs.respose.type";
-import {Attempt, JobAttemptsResponse} from "../types/job.attempts.type";
-import {JobStatus} from "../interfaces/job.interface";
+import {JobAttemptsResponse} from "../types/job.attempts.type";
 import {AttemptType} from "../types/attempt.type";
 
 export default class JobRepository {
@@ -34,7 +33,7 @@ export default class JobRepository {
                                   destination_headers, destination_timeout_ms, dedupe_key, execute_at,
                                   created_at, updated_at, max_attempts, current_attempts, base_delay_ms,
                                   max_delay_ms, rate_limit_rps, rate_limit_burst, idempotency_key)
-                VALUES (@id, @tenant_id, @type, @status, @payload_status, @payload_status, @destination_url,
+                VALUES (@id, @tenant_id, @type, @status, @payload_order_id, @payload_status, @destination_url,
                         @destination_method,
                         @destination_headers, @destination_timeout_ms, @dedupe_key, @execute_at,
                         @created_at, @updated_at, @max_attempts, @current_attempts, @base_delay_ms,

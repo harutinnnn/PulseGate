@@ -82,7 +82,6 @@ export class WorkerPool {
                 maxDelay
             );
 
-            // Jitter: +/- 10%
             const jitter = delay * 0.1 * (Math.random() * 2 - 1);
             const finalDelay = Math.max(0, delay + jitter);
 

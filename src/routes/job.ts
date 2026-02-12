@@ -5,6 +5,7 @@ import AttemptController from "../controllers/attempt.controller";
 import {validate} from "../middleware/validate";
 import {createJobSchema} from "../schemas/create.job.schema";
 import {AppContext} from "../interfaces/app.context.interface";
+import {createJobHandler} from "./tests/createJobHandler";
 
 export const jobRoute = (context: AppContext) => {
 
@@ -42,7 +43,8 @@ export const jobRoute = (context: AppContext) => {
      */
     router.post('/jobs',
         validate(createJobSchema),
-        jobController.addJob
+        createJobHandler(context)
+        // jobController.addJob
     )
 
 
