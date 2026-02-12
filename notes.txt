@@ -14,7 +14,7 @@ npx knex migrate:make create_job_attempts_table -x ts
 =========================================================
 Docker setup
 docker build   --build-arg REPO_URL=github.com/harutinnnn/PulseGate.git   -t my-node-app .
-
+docker build   --build-arg  -t my-node-app .
 docker run -p 8080:8080 my-node-app
 
 --copy docker to another directory

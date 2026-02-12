@@ -18,10 +18,11 @@ RUN npm install
 RUN npm run build
 
 # 2. Compile knexfile.ts -> knexfile.js
-RUN npx tsc knexfile.ts --module commonjs --target es2018 --moduleResolution node --skipLibCheck --esModuleInterop
+#RUN npx tsc knexfile.ts --module commonjs --target es2018 --moduleResolution node --skipLibCheck --esModuleInterop
 
 # 3. Compile Migrations
-RUN npx tsc migrations/*.ts --outDir migrations_build --module commonjs --target es2018 --moduleResolution node --skipLibCheck --esModuleInterop
+#RUN npx tsc migrations/*.ts --outDir migrations_build --module commonjs --target es2018 --moduleResolution node --skipLibCheck --esModuleInterop
+
 
 # --- Stage 2: Production Stage ---
 FROM node:20-alpine
@@ -33,8 +34,8 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 # Copy built artifacts
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/knexfile.js ./
-COPY --from=builder /usr/src/app/migrations_build ./migrations
+#COPY --from=builder /usr/src/app/knexfile.js ./
+#COPY --from=builder /usr/src/app/migrations_build ./migrations
 
 # Install production dependencies
 RUN npm install --only=production
@@ -46,5 +47,4 @@ RUN mkdir -p /usr/src/app/data
 ENV PORT=8080
 EXPOSE 8080
 
-#CMD ["/bin/sh", "-c", "npx knex migrate:latest && node dist/index.js"]
-CMD ["/bin/sh", "-c", "migrate.ts && node dist/index.js"]
+CMD ["./entrypoint.sh"]

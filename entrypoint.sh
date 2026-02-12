@@ -1,9 +1,8 @@
 #!/bin/sh
+set -e
 
-# Run migrations
 echo "Running migrations..."
-npx knex migrate:latest
+npm run migrate
 
-# Start the application
-echo "Starting application..."
-exec "$@"
+echo "Starting app..."
+exec npm run start
