@@ -44,6 +44,9 @@ npm run type-check
 
 ## Docker Deployment
 
+#### You don't need download or clone from repository project sources in git already pushed 
+#### only need build and run docker
+
 ```bash
 # Build and start with Docker Compose
 docker-compose up -d
