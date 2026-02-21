@@ -1,6 +1,6 @@
-import {migrateDb} from './src/db/migration'
-import db from "./src/db/index";
+import { migrateDb } from './src/db/migration';
+import db from './src/db/index';
 
 (async () => {
-    migrateDb(db)
-})()
+  migrateDb(db);
+})();

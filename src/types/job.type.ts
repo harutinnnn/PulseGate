@@ -1,24 +1,24 @@
 export type JobType = {
-    id: string,
-    tenant_id: string,
-    type: string,
-    status: string,
-    payload_order_id: number,
-    payload_status: string,
-    destination_url: string,
-    destination_method: string,
-    destination_headers: string,
-    destination_timeout_ms: number,
-    dedupe_key: string,
-    execute_at: Date,
-    created_at: Date,
-    updated_at: Date,
-    max_attempts: number,
-    current_attempts: number,
-    base_delay_ms: number,
-    max_delay_ms: number,
-    rate_limit_rps: number,
-    rate_limit_burst: number,
-    last_error?: string,
-    idempotency_key?: string
-}
+  id: string;
+  tenant_id: string;
+  type: string;
+  status: string;
+  payload_order_id: number;
+  payload_status: string;
+  destination_url: string;
+  destination_method: string;
+  destination_headers: string;
+  destination_timeout_ms: number;
+  dedupe_key: string;
+  execute_at: Date;
+  created_at: Date;
+  updated_at: Date;
+  max_attempts: number;
+  current_attempts: number;
+  base_delay_ms: number;
+  max_delay_ms: number;
+  rate_limit_rps: number;
+  rate_limit_burst: number;
+  last_error?: string;
+  idempotency_key?: string;
+};

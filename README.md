@@ -44,7 +44,8 @@ npm run type-check
 
 ## Docker Deployment
 
-#### You don't need download or clone from repository project sources in git already pushed 
+#### You don't need download or clone from repository project sources in git already pushed
+
 #### only need build and run docker
 
 ```bash
@@ -121,15 +122,15 @@ curl -X POST http://localhost:8080/v1/jobs/{job_id}/retry
 
 Environment variables (see `.env.example`):
 
-| Variable | Default | Description                                |
-|----------|---------|--------------------------------------------|
-| `PORT` | 8080 | HTTP server port                           |
-| `DATABASE_PATH` | ./database.sqlite | SQLite database file path                  |
-| `QUEUE_CAPACITY` | 10000 | Max in-memory queue size                   |
-| `WORKER_CONCURRENCY` | 20 | Number of concurrent workers               |
-| `SCHEDULER_POLL_INTERVAL_MS` | 5000 | How often to poll for scheduled jobs       |
-| `DEDUPE_WINDOW_SECONDS` | 3600 | Deduplication cache TTL                    |
-| `LOG_LEVEL` | info | Log level (debug, info, warn, http, error) |
+| Variable                     | Default           | Description                                |
+| ---------------------------- | ----------------- | ------------------------------------------ |
+| `PORT`                       | 8080              | HTTP server port                           |
+| `DATABASE_PATH`              | ./database.sqlite | SQLite database file path                  |
+| `QUEUE_CAPACITY`             | 10000             | Max in-memory queue size                   |
+| `WORKER_CONCURRENCY`         | 20                | Number of concurrent workers               |
+| `SCHEDULER_POLL_INTERVAL_MS` | 5000              | How often to poll for scheduled jobs       |
+| `DEDUPE_WINDOW_SECONDS`      | 3600              | Deduplication cache TTL                    |
+| `LOG_LEVEL`                  | info              | Log level (debug, info, warn, http, error) |
 
 ## Monitoring
 
@@ -147,7 +148,7 @@ Prometheus metrics available at `GET /metrics`:
 - `pulsegate_jobs_created_total` - Total jobs created
 - `pulsegate_jobs_completed_total` - Jobs by final status
 - `pulsegate_delivery_duration_seconds` - Webhook delivery latency
- 
+
 ## Documentation
 
 - [Design Decisions](docs/DESIGN.md)

@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 
 services:
   app:
@@ -9,4 +9,4 @@ services:
         REPO_URL: https://github.com/youruser/yourrepo.git
         BRANCH: main
     ports:
-      - "8080:8080"
+      - '8080:8080'

@@ -1,4 +1,4 @@
 export type JobRetryType = {
-    id: string | number,
-    status: string,
-}
+  id: string | number;
+  status: string;
+};

@@ -1,11 +1,9 @@
 import Database from 'better-sqlite3';
-import path from "path";
+import path from 'path';
 
-const db: Database.Database = new Database(
-    path.join(__dirname, "../../database.sqlite"),
-    {
-        // verbose: console.log,
-    });
+const db: Database.Database = new Database(path.join(__dirname, '../../database.sqlite'), {
+  // verbose: console.log,
+});
 
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
@@ -14,13 +12,13 @@ db.pragma('synchronous = NORMAL');
  * Health Check Function
  */
 export const checkDbReady = (): boolean => {
-    try {
-        const result = db.prepare('SELECT 1').get();
-        return !!result;
-    } catch (error) {
-        console.error('Database Health Check Failed:', error);
-        return false;
-    }
+  try {
+    const result = db.prepare('SELECT 1').get();
+    return !!result;
+  } catch (error) {
+    console.error('Database Health Check Failed:', error);
+    return false;
+  }
 };
 
 export default db;

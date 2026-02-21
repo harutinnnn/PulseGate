@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { register } from 'prom-client';
 
-
 /**
  * @openapi
  * /healthz:
@@ -14,9 +13,8 @@ import { register } from 'prom-client';
  *         description: Returns list of users
  */
 export const healthCheck = (req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok' });
+  res.status(200).json({ status: 'ok' });
 };
-
 
 /**
  * @openapi
@@ -30,7 +28,7 @@ export const healthCheck = (req: Request, res: Response) => {
  *         description: Returns list of users
  */
 export const readinessCheck = (req: Request, res: Response) => {
-    res.status(200).json({ status: 'ready' });
+  res.status(200).json({ status: 'ready' });
 };
 
 /**
@@ -45,6 +43,6 @@ export const readinessCheck = (req: Request, res: Response) => {
  *         description: Returns list of users
  */
 export const metricsHandler = async (req: Request, res: Response) => {
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 };

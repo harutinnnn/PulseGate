@@ -1,4 +1,4 @@
 export type JobCreateResponseType = {
-    id: number,
-    status: string,
-}
+  id: number;
+  status: string;
+};

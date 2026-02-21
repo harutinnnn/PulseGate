@@ -1,4 +1,4 @@
 export type ErrorResponseInterface = {
-    statusCode: number,
-    message: string
-}
+  statusCode: number;
+  message: string;
+};
