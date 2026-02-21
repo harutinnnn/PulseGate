@@ -23,6 +23,8 @@ jobs:
         run: npm run lint
       - name: run type check
         run: npm run type-check
-      - name: eun migrate
+      - name: run migrate
         run: npm run migrate
+      - name: run start
+        run: npm run start
 
