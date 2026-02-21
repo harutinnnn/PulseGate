@@ -25,6 +25,4 @@ jobs:
         run: npm run type-check
       - name: run migrate
         run: npm run migrate
-      - name: run start
-        run: npm run start
 
