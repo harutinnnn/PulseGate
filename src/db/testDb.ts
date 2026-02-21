@@ -1,5 +1,4 @@
 import Database from 'better-sqlite3';
-import path from 'path';
 import { JobType } from '../types/job.type';
 import { migrateDb } from './migration';
 

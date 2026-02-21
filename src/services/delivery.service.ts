@@ -4,7 +4,8 @@ import { JobType } from '../types/job.type';
 import { RateLimitManager } from '../utils/rate.limit.manager';
 
 export class DeliveryService {
-  constructor(private rateLimiter: RateLimitManager) {}
+  constructor(private rateLimiter: RateLimitManager) {
+  }
 
   async deliver(job: JobType): Promise<AttemptType> {
     try {
@@ -12,8 +13,8 @@ export class DeliveryService {
       if (!['http:', 'https:'].includes(url.protocol)) {
         throw new Error('invalid_protocol');
       }
-    } catch (error) {
-      throw new Error('invalid_url');
+    } catch (error: any) {
+      throw new Error('invalid_url' + error.message);
     }
 
     const controller = new AbortController();

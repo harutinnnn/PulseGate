@@ -41,7 +41,7 @@ export const createJobHandler = (context: AppContext) => async (req: Request, re
 
     const newJob = context.jobRepo.create(jobData);
     return res.status(201).json(newJob);
-  } catch (e) {
-    return res.status(500).json({ error: { message: 'Internal Server Error' } });
+  } catch (e: any) {
+    return res.status(500).json({ error: { message: 'Internal Server Error' + e.message } });
   }
 };
